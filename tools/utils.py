@@ -1,5 +1,6 @@
 import io
 import fastavro
+import datetime
 
 def read_avro(msg):
     """
@@ -18,3 +19,5 @@ def read_avro(msg):
         return record  # Return the first record found
     return None  # Return None if no records are found or if an error occurs
 
+def log(message):
+    print(f"{datetime.utcnow()} - {message}")
