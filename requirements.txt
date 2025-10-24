@@ -3,3 +3,4 @@ fastavro
 snappy
 cramjam
 python-dotenv
+confluent_kafka
