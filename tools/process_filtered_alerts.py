@@ -3,7 +3,7 @@ import time
 
 from confluent_kafka import Consumer
 
-from tools.api import SkyPortal
+from api import SkyPortal
 from utils import read_avro, log
 from dotenv import load_dotenv
 
