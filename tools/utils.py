@@ -1,6 +1,7 @@
 import io
 import fastavro
-import datetime
+
+from datetime import datetime
 
 def read_avro(msg):
     """
