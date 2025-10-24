@@ -1,13 +1,17 @@
 import time
+import json
 
 from confluent_kafka import Consumer
-from utils import read_avro
+from tools.utils import read_avro
 
 thumbnail_types = [
     ("cutoutScience", "new"),
     ("cutoutTemplate", "ref"),
     ("cutoutDifference", "sub"),
 ]
+fast_transients_filter_v1 = "e5816292-f173-49d0-8d8b-5da2bf65d403"
+fast_transients_filter_v2 = "e5816292-f173-49d0-8d8b-5da2bf650001"
+fast_transients_lsst_filter_v2 = "e5816292-f173-49d0-8d8b-5da2bf651001"
 
 consumer = Consumer({
     'bootstrap.servers': 'localhost:9092',
@@ -19,6 +23,7 @@ consumer = Consumer({
     "security.protocol": "PLAINTEXT",  # Use PLAINTEXT if no authentication
 })
 topic = 'LSST_alerts_results'
+topic = 'ZTF_alerts_results'
 consumer.subscribe([topic])
 print(f"Subscribed to topic: {topic}")
 
@@ -44,7 +49,6 @@ def consume():
             # Save the first alert to a JSON file for inspection of its structure
             if len(alerts) == 0:
                 with open("first_alert.json", "w") as f:
-                    import json
                     json.dump(record, f, indent=2)
 
             alerts.append(record)
