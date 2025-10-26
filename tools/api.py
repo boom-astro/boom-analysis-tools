@@ -185,16 +185,10 @@ class SkyPortal:
         Returns
         -------
         dict
-            API response
+            The decoded JSON response from the API
 
         """
-        try:
-            return self.api("POST", f"/api/source_groups", data={
-                "objId": object_id,
-                "inviteGroupIds": group_ids,
-            })
-        except Exception as e:
-            if "Source already saved to group" in str(e):
-                log(f"Object {object_id} is already saved to one or more of the specified groups.")
-            else:
-                raise e
+        return self.api("POST", f"/api/source_groups", data={
+            "objId": object_id,
+            "inviteGroupIds": group_ids,
+        }, return_response=True).json()
