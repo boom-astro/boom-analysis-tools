@@ -25,6 +25,11 @@ consumer = Consumer({
 })
 consumer.subscribe([topic])
 
+RED = "\033[31m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+ENDC = "\033[0m"
+
 def consume():
     skyportal = SkyPortal(instance=skyportal_url, token=skyportal_api_key)
 
@@ -43,10 +48,17 @@ def consume():
             # Check if the alert passed the specified filter and save to groups if so
             for filter in record.get("filters", []):
                 if filter.get("filter_id") == filter_id:
-                    skyportal.save_to_groups(
+                    response = skyportal.save_to_groups(
                         record.get("objectId"),
                         group_ids_to_save_source_to,
                     )
+                    if response.get("status") == "success":
+                        log(f"{GREEN}Object {record.get('objectId')} saved.{ENDC}")
+                    elif response.get("message").startswith("Source already saved"):
+                        log(f"{YELLOW}Object {record.get('objectId')} already saved.{ENDC}")
+                    else:
+                        log(f"{RED}Error saving object {record.get('objectId')}: {response.get('message')}{ENDC}")
+
     except KeyboardInterrupt:
         pass
     finally:
