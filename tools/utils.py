@@ -21,4 +21,4 @@ def read_avro(msg):
     return None  # Return None if no records are found or if an error occurs
 
 def log(message):
-    print(f"{datetime.utcnow()} - {message}")
+    print(f"{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} - {message}")
