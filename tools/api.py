@@ -171,7 +171,7 @@ class SkyPortal:
             time.sleep(0.3)
         return items
 
-    def save_to_groups(self, object_id, group_ids):
+    def save_to_groups(self, object_id, group_id):
         """
         Save an object to multiple groups
 
@@ -179,9 +179,8 @@ class SkyPortal:
         ----------
         object_id : str
             ID of the object to save
-        group_ids : list of int
-            List of group IDs to save the object to
-
+        group_id : int
+            ID of the group to save the object to
         Returns
         -------
         dict
@@ -190,5 +189,5 @@ class SkyPortal:
         """
         return self.api("POST", f"/api/source_groups", data={
             "objId": object_id,
-            "inviteGroupIds": group_ids,
+            "inviteGroupIds": [group_id],
         }, return_response=True).json()

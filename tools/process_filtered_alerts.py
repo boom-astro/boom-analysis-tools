@@ -1,5 +1,6 @@
 import os
 import time
+import json
 
 from confluent_kafka import Consumer
 from api import SkyPortal
@@ -10,9 +11,9 @@ load_dotenv()
 
 skyportal_url = os.getenv("SKYPORTAL_URL")
 skyportal_api_key = os.getenv("SKYPORTAL_API_KEY")
-filter_id = os.getenv("FILTER_ID")
+
 topic = os.getenv("TOPIC")
-group_ids_to_save_source_to =[int(x) for x in os.getenv("GROUP_IDS_TO_SAVE_SOURCE_TO").split(',')]
+filter_to_group_map = json.loads(os.getenv("FILTER_TO_GROUP_MAP"))
 
 consumer = Consumer({
     'bootstrap.servers': 'localhost:9092',
@@ -45,12 +46,12 @@ def consume():
                 continue
             record = read_avro(msg)
 
-            # Check if the alert passed the specified filter and save to groups if so
+            # Check if the alert passed any of the filters in the map
             for filter in record.get("filters", []):
-                if filter.get("filter_id") == filter_id:
+                if filter.get("filter_id") in filter_to_group_map:
                     response = skyportal.save_to_groups(
                         record.get("objectId"),
-                        group_ids_to_save_source_to,
+                        filter_to_group_map[filter.get("filter_id")]
                     )
                     if response.get("status") == "success":
                         log(f"{GREEN}Object {record.get('objectId')} saved.{ENDC}")
