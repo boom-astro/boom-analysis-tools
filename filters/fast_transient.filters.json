@@ -1,0 +1,65 @@
+[
+  {
+    "_id": "e5816292-f173-49d0-8d8b-5da2bf650001",
+    "active": true,
+    "user_id": "cli",
+    "catalog": "ZTF_alerts",
+    "permissions": [
+      1,
+      2,
+      3
+    ],
+    "active_fid": "fast_transient_v2",
+    "fv": [
+      {
+        "fid": "fast_transient_v2",
+        "pipeline": "[\n  {\n    \"$match\": {\n      \"candidate.rb\": {\n        \"$gt\": 0.3\n      },\n      \"candidate.drb\": {\n        \"$gt\": 0.9\n      },\n      \"candidate.magpsf\": {\n        \"$lt\": 99\n      },\n      \"candidate.ndethist\": {\n        \"$lte\": 200\n      },\n      \"candidate.nbad\": {\n        \"$lt\": 5\n      },\n      \"candidate.fwhm\": {\n        \"$gt\": 0.5,\n        \"$lt\": 8\n      },\n      \"candidate.isdiffpos\": true,\n      \"properties.rock\": false,\n      \"properties.star\": false,\n      \"properties.near_brightstar\": false,\n      \"properties.stationary\": true,\n      \"$and\": [\n        {\n          \"$or\": [\n            {\n              \"coordinates.b\": {\n                \"$gte\": 20\n              }\n            },\n            {\n              \"coordinates.b\": {\n                \"$lte\": -20\n              }\n            }\n          ]\n        },\n        {\n          \"$or\": [\n            {\n              \"$and\": [\n                {\n                  \"properties.photstats.r.fading.rate\": {\n                    \"$gte\": 0.3\n                  }\n                },\n                {\n                  \"properties.photstats.r.fading.r_squared\": {\n                    \"$gte\": 0.5\n                  }\n                }\n              ]\n            },\n            {\n              \"$and\": [\n                {\n                  \"properties.photstats.g.fading.rate\": {\n                    \"$gte\": 0.3\n                  }\n                },\n                {\n                  \"properties.photstats.g.fading.r_squared\": {\n                    \"$gte\": 0.5\n                  }\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"$expr\": {\n            \"$lt\": [\n              {\n                \"$abs\": {\n                  \"$subtract\": [\n                    \"$candidate.jd\",\n                    \"$candidate.jdstarthist\"\n                  ]\n                }\n              },\n              7.0\n            ]\n          }\n        },\n        {\n          \"$expr\": {\n            \"$gt\": [\n              {\n                \"$abs\": {\n                  \"$subtract\": [\n                    \"$candidate.jd\",\n                    \"$candidate.jdstarthist\"\n                  ]\n                }\n              },\n              0\n            ]\n          }\n        },\n        {\n          \"$expr\": {\n            \"$lt\": [\n              {\n                \"$abs\": {\n                  \"$subtract\": [\n                    \"$candidate.magpsf\",\n                    \"$candidate.magap\"\n                  ]\n                }\n              },\n              0.75\n            ]\n          }\n        },\n        {\n          \"$expr\": {\n            \"$gt\": [\n              \"$candidate.ncovhist\",\n              \"$candidate.ndethist\"\n            ]\n          }\n        }\n      ]\n    }\n  },\n  {\n    \"$project\": {\n      \"objectId\": 1,\n      \"t_now\": \"$candidate.jd\",\n      \"m_now\": \"$candidate.magpsf\",\n      \"photstats\": \"$properties.photstats\"\n    }\n  },\n  {\n    \"$project\": {\n      \"objectId\": 1,\n      \"annotations.passed_at\": \"$t_now\",\n      \"annotations.current_magpsf\": \"$m_now\",\n      \"annotations.photstats\": \"$photstats\"\n    }\n  }\n]",
+        "created_at": 2460969.5
+      }
+    ],
+    "created_at": 2460969.5,
+    "updated_at": 2460969.5
+  },
+  {
+    "_id": "e5816292-f173-49d0-8d8b-5da2bf651001",
+    "active": true,
+    "user_id": "cli",
+    "catalog": "LSST_alerts",
+    "permissions": [
+      1,
+      2,
+      3
+    ],
+    "active_fid": "fast_transient_lsst_v1",
+    "fv": [
+      {
+        "fid": "fast_transient_lsst_v1",
+        "pipeline": "[\n  {\n    \"$match\": {\n      \"candidate.reliability\": {\n        \"$gte\": 0.5\n      },\n      \"candidate.magpsf\": {\n        \"$lt\": 99\n      },\n      \"candidate.isdiffpos\": true,\n      \"properties.rock\": false,\n      \"properties.stationary\": true,\n      \"$and\": [\n        {\n          \"$or\": [\n            {\n              \"coordinates.b\": {\n                \"$gte\": 20\n              }\n            },\n            {\n              \"coordinates.b\": {\n                \"$lte\": -20\n              }\n            }\n          ]\n        },\n        {\n          \"$or\": [\n            {\n              \"$and\": [\n                {\n                  \"properties.photstats.z.fading.rate\": {\n                    \"$gte\": 0.3\n                  }\n                },\n                {\n                  \"properties.photstats.z.fading.r_squared\": {\n                    \"$gte\": 0.5\n                  }\n                }\n              ]\n            },\n            {\n              \"$and\": [\n                {\n                  \"properties.photstats.g.fading.rate\": {\n                    \"$gte\": 0.3\n                  }\n                },\n                {\n                  \"properties.photstats.g.fading.r_squared\": {\n                    \"$gte\": 0.5\n                  }\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"$expr\": {\n            \"$lt\": [\n              {\n                \"$abs\": {\n                  \"$subtract\": [\n                    \"$candidate.magpsf\",\n                    \"$candidate.magap\"\n                  ]\n                }\n              },\n              0.75\n            ]\n          }\n        }\n      ]\n    }\n  },\n  {\n    \"$project\": {\n      \"objectId\": 1,\n      \"t_now\": \"$candidate.jd\",\n      \"m_now\": \"$candidate.magpsf\",\n      \"photstats\": \"$properties.photstats\"\n    }\n  },\n  {\n    \"$project\": {\n      \"objectId\": 1,\n      \"annotations.passed_at\": \"$t_now\",\n      \"annotations.current_magpsf\": \"$m_now\",\n      \"annotations.photstats\": \"$photstats\"\n    }\n  }\n]",
+        "created_at": 2460969.5
+      }
+    ],
+    "created_at": 2460969.5,
+    "updated_at": 2460969.5
+  },
+  {
+    "_id": "galactic_fast_transient",
+    "active": true,
+    "user_id": "cli",
+    "catalog": "ZTF_alerts",
+    "permissions": [
+      1,
+      2,
+      3
+    ],
+    "active_fid": "galactic_fast_transient_v1",
+    "fv": [
+      {
+        "fid": "galactic_fast_transient_v1",
+        "pipeline": "[\n  {\n    \"$match\": {\n      \"candidate.rb\": {\n        \"$gt\": 0.3\n      },\n      \"candidate.drb\": {\n        \"$gt\": 0.9\n      },\n      \"candidate.magpsf\": {\n        \"$lt\": 99\n      },\n      \"candidate.ndethist\": {\n        \"$lte\": 200\n      },\n      \"candidate.nbad\": {\n        \"$lt\": 5\n      },\n      \"candidate.fwhm\": {\n        \"$gt\": 0.5,\n        \"$lt\": 8\n      },\n      \"candidate.isdiffpos\": true,\n      \"properties.rock\": false,\n      \"properties.star\": false,\n      \"properties.near_brightstar\": false,\n      \"properties.stationary\": true,\n      \"$and\": [\n        {\n          \"$and\": [\n            {\n              \"coordinates.b\": {\n                \"$lte\": 20\n              }\n            },\n            {\n              \"coordinates.b\": {\n                \"$gte\": -20\n              }\n            }\n          ]\n        },\n        {\n          \"$or\": [\n            {\n              \"$and\": [\n                {\n                  \"properties.photstats.r.fading.rate\": {\n                    \"$gte\": 0.3\n                  }\n                },\n                {\n                  \"properties.photstats.r.fading.r_squared\": {\n                    \"$gte\": 0.5\n                  }\n                }\n              ]\n            },\n            {\n              \"$and\": [\n                {\n                  \"properties.photstats.g.fading.rate\": {\n                    \"$gte\": 0.3\n                  }\n                },\n                {\n                  \"properties.photstats.g.fading.r_squared\": {\n                    \"$gte\": 0.5\n                  }\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"$expr\": {\n            \"$lt\": [\n              {\n                \"$abs\": {\n                  \"$subtract\": [\n                    \"$candidate.jd\",\n                    \"$candidate.jdstarthist\"\n                  ]\n                }\n              },\n              7.0\n            ]\n          }\n        },\n        {\n          \"$expr\": {\n            \"$gt\": [\n              {\n                \"$abs\": {\n                  \"$subtract\": [\n                    \"$candidate.jd\",\n                    \"$candidate.jdstarthist\"\n                  ]\n                }\n              },\n              0\n            ]\n          }\n        },\n        {\n          \"$expr\": {\n            \"$lt\": [\n              {\n                \"$abs\": {\n                  \"$subtract\": [\n                    \"$candidate.magpsf\",\n                    \"$candidate.magap\"\n                  ]\n                }\n              },\n              0.75\n            ]\n          }\n        },\n        {\n          \"$expr\": {\n            \"$gt\": [\n              \"$candidate.ncovhist\",\n              \"$candidate.ndethist\"\n            ]\n          }\n        }\n      ]\n    }\n  },\n  {\n    \"$project\": {\n      \"objectId\": 1,\n      \"t_now\": \"$candidate.jd\",\n      \"m_now\": \"$candidate.magpsf\",\n      \"photstats\": \"$properties.photstats\"\n    }\n  },\n  {\n    \"$project\": {\n      \"objectId\": 1,\n      \"annotations.passed_at\": \"$t_now\",\n      \"annotations.current_magpsf\": \"$m_now\",\n      \"annotations.photstats\": \"$photstats\"\n    }\n  }\n]",
+        "created_at": 2460958
+      }
+    ],
+    "created_at": 2460958,
+    "updated_at": 2460958
+  }
+]
