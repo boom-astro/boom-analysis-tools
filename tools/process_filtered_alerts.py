@@ -60,6 +60,8 @@ def consume():
                     else:
                         log(f"{RED}Error saving object {record.get('objectId')}: {response.get('message')}{ENDC}")
 
+                time.sleep(0.5)  # To avoid hitting rate limits
+
     except KeyboardInterrupt:
         pass
     finally:
