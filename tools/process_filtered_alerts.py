@@ -35,8 +35,8 @@ def consume():
     skyportal = SkyPortal(instance=skyportal_url, token=skyportal_api_key)
 
     log("Listening for messages...")
-    try:
-        while True:
+    while True:
+        try:
             msg = consumer.poll(timeout=10.0)
             if msg is None:
                 time.sleep(5)
@@ -62,10 +62,12 @@ def consume():
 
                 time.sleep(0.5)  # To avoid hitting rate limits
 
-    except KeyboardInterrupt:
-        pass
-    finally:
-        consumer.close()
+        except Exception as e:
+            log(e)
+        except KeyboardInterrupt:
+            break
+
+    consumer.close()
 
 if __name__ == "__main__":
     consume()
