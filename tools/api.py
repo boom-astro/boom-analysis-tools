@@ -2,7 +2,7 @@ import functools
 import time
 import requests
 
-from utils import log
+from utils import log, RED, YELLOW, GREEN, ENDC
 
 SLOW_RESPONSE_THRESHOLD = 5  # seconds
 
@@ -12,9 +12,6 @@ def handle_timeout(method):
     If a request takes longer than 5 seconds, log a warning.
     If a request times out, raise a TimeoutError with a custom message.
     """
-    red = "\033[31m"
-    yellow = "\033[33m"
-    endc = "\033[0m"
     def get_request_type(method_name, args):
         """Return the method name or endpoint being called if method is 'api'"""
         if method_name == "api" and len(args) > 1:
@@ -29,15 +26,15 @@ def handle_timeout(method):
 
             latency = time.time() - start
             if latency > SLOW_RESPONSE_THRESHOLD:
-                log(f"{yellow}Warning - SkyPortal API is responding slowly to {get_request_type(method.__name__, args)} requests: {latency:.2f} seconds{endc}")
+                log(f"{YELLOW}Warning - SkyPortal API is responding slowly to {get_request_type(method.__name__, args)} requests: {latency:.2f} seconds{ENDC}")
 
             return result
         except requests.exceptions.Timeout:
             raise TimeoutError(
-                f"{red}Timeout error{endc} - SkyPortal API not responding to {yellow}{get_request_type(method.__name__, args)}{endc} request"
+                f"{RED}Timeout error{ENDC} - SkyPortal API not responding to {YELLOW}{get_request_type(method.__name__, args)}{ENDC} request"
             )
         except Exception as e:
-            raise Exception(f"{red}Error in {get_request_type(method.__name__, args)}{endc} - {e}")
+            raise Exception(f"{RED}Error in {get_request_type(method.__name__, args)}{ENDC} - {e}")
     return wrapper
 
 class SkyPortal:
@@ -187,7 +184,48 @@ class SkyPortal:
             The decoded JSON response from the API
 
         """
-        return self.api("POST", f"/api/source_groups", data={
+        response = self.api("POST", f"/api/source_groups", data={
             "objId": object_id,
-            "inviteGroupIds": [group_id],
+            "inviteGroupIds": [group_id]
         }, return_response=True).json()
+        if response.get("status") == "success":
+            log(f"{GREEN}Object {object_id} saved.{ENDC}")
+        elif response.get("message").startswith("Source already saved"):
+            log(f"{YELLOW}Object {object_id} already saved.{ENDC}")
+        else:
+            log(f"{RED}Error saving object {object_id}: {response.get('message')}{ENDC}")
+        return response
+
+
+    def add_annotation(self, object_id, group_ids, origin, data):
+        """
+        Add an annotation to a source
+
+        Parameters
+        ----------
+        object_id : str
+            ID of the object to annotate
+        group_ids : list of int
+            List of group IDs that can view the annotation
+        origin : str
+            Origin of the annotation
+        data : dict
+            Annotation data
+
+        Returns
+        -------
+        dict
+            The decoded JSON response from the API
+        """
+        response = self.api("POST", f"/api/sources/{object_id}/annotations", data={
+            "group_ids": group_ids,
+            "origin": origin,
+            "data": data,
+        }, return_response=True).json()
+        if response.get("status") == "success":
+            log(f"{GREEN}Annotation added to {object_id}.{ENDC}")
+        elif response.get("message").startswith("Annotation already exists"):
+            log(f"{YELLOW}Annotation already exists for {object_id}.{ENDC}")
+        else:
+            log(f"{RED}Error adding annotation to {object_id}: {response.get('message')}{ENDC}")
+        return response
