@@ -3,6 +3,11 @@ import fastavro
 
 from datetime import datetime
 
+RED = "\033[31m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+ENDC = "\033[0m"
+
 def read_avro(msg):
     """
     Reads an Avro record from a Kafka message.
