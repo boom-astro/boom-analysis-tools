@@ -13,6 +13,7 @@ skyportal_url = os.getenv("SKYPORTAL_URL")
 skyportal_api_key = os.getenv("SKYPORTAL_API_KEY")
 
 topic = os.getenv("TOPIC")
+annotation_origin = os.getenv("ANNOTATION_ORIGIN")
 filter_to_group_map = json.loads(os.getenv("FILTER_TO_GROUP_MAP"))
 
 consumer = Consumer({
@@ -25,11 +26,6 @@ consumer = Consumer({
     "security.protocol": "PLAINTEXT",  # Use PLAINTEXT if no authentication
 })
 consumer.subscribe([topic])
-
-RED = "\033[31m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-ENDC = "\033[0m"
 
 def consume():
     skyportal = SkyPortal(instance=skyportal_url, token=skyportal_api_key)
@@ -49,18 +45,29 @@ def consume():
             # Check if the alert passed any of the filters in the map
             for filter in record.get("filters", []):
                 if filter.get("filter_id") in filter_to_group_map:
-                    response = skyportal.save_to_groups(
+                    skyportal.save_to_groups(
                         record.get("objectId"),
                         filter_to_group_map[filter.get("filter_id")]
                     )
-                    if response.get("status") == "success":
-                        log(f"{GREEN}Object {record.get('objectId')} saved.{ENDC}")
-                    elif response.get("message").startswith("Source already saved"):
-                        log(f"{YELLOW}Object {record.get('objectId')} already saved.{ENDC}")
-                    else:
-                        log(f"{RED}Error saving object {record.get('objectId')}: {response.get('message')}{ENDC}")
 
-                time.sleep(0.5)  # To avoid hitting rate limits
+                    annotations = json.loads(filter.get("annotations"))
+                    data={}
+                    for band, photstat in annotations.get("photstats", {}).items():
+                        data[f"{band}_band_peak_jd"] = photstat.get("peak_jd")
+                        data[f"{band}_band_peak_mag"] = photstat.get("peak_mag")
+                        if photstat.get("fading") is not None:
+                            data[f"{band}_band_fading_rate"] = photstat.get("fading").get("rate")
+                        if photstat.get("rising") is not None:
+                            data[f"{band}_band_rising_rate"] = photstat.get("rising").get("rate")
+
+                    skyportal.add_annotation(
+                        record.get("objectId"),
+                        [filter_to_group_map[filter.get("filter_id")]],
+                        annotation_origin,
+                        data
+                    )
+
+                    time.sleep(0.2)  # To avoid hitting rate limits
 
         except Exception as e:
             log(e)
