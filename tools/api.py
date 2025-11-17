@@ -196,7 +196,6 @@ class SkyPortal:
             log(f"{RED}Error saving object {object_id}: {response.get('message')}{ENDC}")
         return response
 
-
     def add_annotation(self, object_id, group_ids, origin, data):
         """
         Add an annotation to a source

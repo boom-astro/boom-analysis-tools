@@ -32,10 +32,12 @@ def log(message):
 def fetch_mongo(url, db_name, collection_name):
     """
     Fetch a MongoDB collection.
+
     Args:
         url (str): MongoDB connection URL.
         db_name (str): Name of the database.
         collection_name (str): Name of the collection.
+
     Returns:
         collection: The MongoDB collection object.
     """
