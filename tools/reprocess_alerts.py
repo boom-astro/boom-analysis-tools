@@ -63,17 +63,22 @@ if __name__ == "__main__":
     )
 
     log(f"Starting to push alerts to Redis queue in batches of {batch_size}...")
-    alerts_list = list(alerts_collection.find())
-    for batch in range(0, nb_alerts, batch_size):
-        log(f"{batch}/{nb_alerts} alerts processed.")
-        # Prepare the list of alert IDs or programid,alertid tuples to push to Redis
-        alerts = [
-            f"{alert['candidate']['programid']},{alert['_id']}" # Only for ZTF filter reprocessing
-            if reprocess_type == "filter" and survey_name == "ZTF"
-            else alert["_id"]
-            for alert in alerts_list[batch:batch + batch_size]
-        ]
-        # Push the batch of alerts to the appropriate Redis queue
-        redis.lpush(get_redis_queue(survey_name, reprocess_type), *alerts)
+
+    batch = []
+    count = 0
+    redis_queue = get_redis_queue(survey_name, reprocess_type)
+    for alert in alerts_collection.find():
+        # For ZTF filter reprocessing, we need both programid and alert id
+        if reprocess_type == "filter" and survey_name == "ZTF":
+            batch.append(f"{alert['candidate']['programid']},{alert['_id']}")
+        else:
+            batch.append(alert["_id"])
+
+        count += 1
+
+        if len(batch) >= batch_size or count == nb_alerts:
+            redis.lpush(redis_queue, *batch)
+            log(f"{count}/{nb_alerts} alerts processed.")
+            batch = []
 
     log(f"Finished reprocessing {nb_alerts} alerts.")
