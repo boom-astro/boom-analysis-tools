@@ -29,14 +29,14 @@ def read_avro(msg):
 def log(message):
     print(f"{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} - {message}")
 
-def fetch_mongo(url, db_name, collection_name):
+def fetch_mongo(collection_name, url="mongodb://localhost:27017", db_name="boom"):
     """
     Fetch a MongoDB collection.
 
     Args:
+        collection_name (str): Name of the collection.
         url (str): MongoDB connection URL.
         db_name (str): Name of the database.
-        collection_name (str): Name of the collection.
 
     Returns:
         collection: The MongoDB collection object.
