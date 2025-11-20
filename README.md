@@ -18,4 +18,4 @@ This script consumes messages from the BOOM Kafka broker and deserializes them f
     ```
     python boom_consumer.py
     ```
-    The script will connect to the Kafka broker at `localhost:9092` and consumes messages from the `LSST_alerts_results` topic, saving the first message to `first_alert.json` for inspection.
+    The script will connect to the Kafka broker at `localhost:9092` and consumes messages from the topic specified by the `TOPIC` environment variable, saving the first message to `first_alert.json` for inspection.
