@@ -1,5 +1,6 @@
 # boom-analysis-tools
-Scripts to evaluate BOOM output
+This repository contains a script to consume BOOM Kafka alerts and some filters used on the BOOM brokers.
+It also includes a set of tools to manage and analyze BOOM outputs and take appropriate actions.
 
 ## Boom Kafka Alerts Consumer
 
