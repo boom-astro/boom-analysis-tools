@@ -5,4 +5,6 @@ cramjam
 python-dotenv
 pymongo
 redis
+matplotlib
+astropy
 slack_sdk
