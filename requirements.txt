@@ -5,3 +5,4 @@ cramjam
 python-dotenv
 pymongo
 redis
+slack_sdk
