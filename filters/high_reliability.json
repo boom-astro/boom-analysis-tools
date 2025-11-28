@@ -1,0 +1,25 @@
+[
+  {
+    "$match": {
+      "candidate.reliability": {
+        "$gt": 0.7
+      },
+      "candidate.magpsf": {
+        "$lte": 22.5
+      },
+      "candidate.is_sso": false,
+      "candidate.isdiffpos": true
+    }
+  },
+  {
+    "$project": {
+      "objectId": 1,
+      "annotations.mag_now": {
+        "$round": [
+          "$candidate.magpsf",
+          2
+        ]
+      }
+    }
+  }
+]

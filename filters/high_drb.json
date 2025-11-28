@@ -1,0 +1,15 @@
+[
+  {
+    "$project": {
+      "candidate.drb": 1,
+      "objectId": 1
+    }
+  },
+  {
+    "$match": {
+      "candidate.drb": {
+        "$gte": 0.9
+      }
+    }
+  }
+]
