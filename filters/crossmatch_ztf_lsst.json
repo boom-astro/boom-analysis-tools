@@ -1,0 +1,35 @@
+[
+  {
+    "$match": {
+      "candidate.drb": {
+        "$gt": 0.8
+      },
+      "candidate.magpsf": {
+        "$lte": 21.5
+      },
+      "candidate.ssdistnr": {
+        "$lt": 0
+      },
+      "candidate.isdiffpos": true
+    }
+  },
+  {
+    "$match": {
+      "aliases.LSST.0": {
+        "$exists": true
+      }
+    }
+  },
+  {
+    "$project": {
+      "objectId": 1,
+      "annotations.mag_now": {
+        "$round": [
+          "$candidate.magpsf",
+          2
+        ]
+      },
+      "annotations.lsst": "$aliases.LSST"
+    }
+  }
+]
