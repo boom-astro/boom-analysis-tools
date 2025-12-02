@@ -1,0 +1,34 @@
+[
+  {
+    "$match": {
+      "candidate.reliability": {
+        "$gt": 0.5
+      },
+      "candidate.magpsf": {
+        "$lte": 24.5
+      },
+      "candidate.is_sso": false,
+      "candidate.isdiffpos": true
+    }
+  },
+  {
+    "$match": {
+      "cross_matches.NED.0": {
+        "$exists": true
+      }
+    }
+  },
+  {
+    "$project": {
+      "objectId": 1,
+      "annotations.mag_now": {
+        "$round": [
+          "$candidate.magpsf",
+          2
+        ]
+      },
+      "annotations.ned_arcsec": "$cross_matches.NED.distance_arcsec",
+      "annotations.ned_z": "$cross_matches.NED.z"
+    }
+  }
+]
