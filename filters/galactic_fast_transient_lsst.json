@@ -1,41 +1,26 @@
 [
   {
     "$match": {
-      "candidate.rb": {
-        "$gt": 0.3
-      },
-      "candidate.drb": {
-        "$gt": 0.9
+      "candidate.reliability": {
+        "$gte": 0.5
       },
       "candidate.magpsf": {
         "$lt": 99
       },
-      "candidate.ndethist": {
-        "$lte": 200
-      },
-      "candidate.nbad": {
-        "$lt": 5
-      },
-      "candidate.fwhm": {
-        "$gt": 0.5,
-        "$lt": 8
-      },
       "candidate.isdiffpos": true,
       "properties.rock": false,
-      "properties.star": false,
-      "properties.near_brightstar": false,
       "properties.stationary": true,
       "$and": [
         {
           "$and": [
             {
               "coordinates.b": {
-                "$lte": 20
+                "$lt": 20
               }
             },
             {
               "coordinates.b": {
-                "$gte": -20
+                "$gt": -20
               }
             }
           ]
@@ -45,14 +30,12 @@
             {
               "$and": [
                 {
-                  "properties.photstats.r.fading.rate":
-                  {
+                  "properties.photstats.z.fading.rate": {
                     "$gte": 0.3
                   }
                 },
                 {
-                  "properties.photstats.r.fading.r_squared":
-                  {
+                  "properties.photstats.z.fading.r_squared": {
                     "$gte": 0.5
                   }
                 }
@@ -61,50 +44,18 @@
             {
               "$and": [
                 {
-                  "properties.photstats.g.fading.rate":
-                  {
+                  "properties.photstats.g.fading.rate": {
                     "$gte": 0.3
                   }
                 },
                 {
-                  "properties.photstats.g.fading.r_squared":
-                  {
+                  "properties.photstats.g.fading.r_squared": {
                     "$gte": 0.5
                   }
                 }
               ]
             }
           ]
-        },
-        {
-          "$expr": {
-            "$lt": [
-              {
-                "$abs": {
-                  "$subtract": [
-                    "$candidate.jd",
-                    "$candidate.jdstarthist"
-                  ]
-                }
-              },
-              7.0
-            ]
-          }
-        },
-        {
-          "$expr": {
-            "$gt": [
-              {
-                "$abs": {
-                  "$subtract": [
-                    "$candidate.jd",
-                    "$candidate.jdstarthist"
-                  ]
-                }
-              },
-              0
-            ]
-          }
         },
         {
           "$expr": {
@@ -118,14 +69,6 @@
                 }
               },
               0.75
-            ]
-          }
-        },
-        {
-          "$expr": {
-            "$gt": [
-              "$candidate.ncovhist",
-              "$candidate.ndethist"
             ]
           }
         }

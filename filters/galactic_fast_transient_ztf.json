@@ -1,26 +1,41 @@
 [
   {
     "$match": {
-      "candidate.reliability": {
-        "$gte": 0.5
+      "candidate.rb": {
+        "$gt": 0.3
+      },
+      "candidate.drb": {
+        "$gt": 0.9
       },
       "candidate.magpsf": {
         "$lt": 99
       },
+      "candidate.ndethist": {
+        "$lte": 200
+      },
+      "candidate.nbad": {
+        "$lt": 5
+      },
+      "candidate.fwhm": {
+        "$gt": 0.5,
+        "$lt": 8
+      },
       "candidate.isdiffpos": true,
       "properties.rock": false,
+      "properties.star": false,
+      "properties.near_brightstar": false,
       "properties.stationary": true,
       "$and": [
         {
-          "$or": [
+          "$and": [
             {
               "coordinates.b": {
-                "$gte": 20
+                "$lt": 20
               }
             },
             {
               "coordinates.b": {
-                "$lte": -20
+                "$gt": -20
               }
             }
           ]
@@ -30,12 +45,12 @@
             {
               "$and": [
                 {
-                  "properties.photstats.z.fading.rate": {
+                  "properties.photstats.r.fading.rate": {
                     "$gte": 0.3
                   }
                 },
                 {
-                  "properties.photstats.z.fading.r_squared": {
+                  "properties.photstats.r.fading.r_squared": {
                     "$gte": 0.5
                   }
                 }
@@ -63,12 +78,50 @@
               {
                 "$abs": {
                   "$subtract": [
+                    "$candidate.jd",
+                    "$candidate.jdstarthist"
+                  ]
+                }
+              },
+              7.0
+            ]
+          }
+        },
+        {
+          "$expr": {
+            "$gt": [
+              {
+                "$abs": {
+                  "$subtract": [
+                    "$candidate.jd",
+                    "$candidate.jdstarthist"
+                  ]
+                }
+              },
+              0
+            ]
+          }
+        },
+        {
+          "$expr": {
+            "$lt": [
+              {
+                "$abs": {
+                  "$subtract": [
                     "$candidate.magpsf",
                     "$candidate.magap"
                   ]
                 }
               },
               0.75
+            ]
+          }
+        },
+        {
+          "$expr": {
+            "$gt": [
+              "$candidate.ncovhist",
+              "$candidate.ndethist"
             ]
           }
         }
