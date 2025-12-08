@@ -44,10 +44,12 @@ def consume():
 
             # Check if the alert passed any of the filters in the map
             for filter in record.get("filters", []):
-                if filter.get("filter_id") in filter_to_group_map:
+                filter_name = filter.get("filter_name")
+                if filter_name in filter_to_group_map:
+                    group_id = filter_to_group_map[filter_name]
                     skyportal.save_to_groups(
                         record.get("objectId"),
-                        filter_to_group_map[filter.get("filter_id")]
+                        group_id
                     )
 
                     annotations = json.loads(filter.get("annotations"))
@@ -62,7 +64,7 @@ def consume():
 
                     skyportal.add_annotation(
                         record.get("objectId"),
-                        [filter_to_group_map[filter.get("filter_id")]],
+                        [group_id],
                         annotation_origin,
                         data
                     )
