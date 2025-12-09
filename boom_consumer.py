@@ -9,9 +9,9 @@ thumbnail_types = [
     ("cutoutTemplate", "ref"),
     ("cutoutDifference", "sub"),
 ]
-fast_transients_filter_v1 = "e5816292-f173-49d0-8d8b-5da2bf65d403"
-fast_transients_filter_v2 = "e5816292-f173-49d0-8d8b-5da2bf650001"
-fast_transients_lsst_filter_v2 = "e5816292-f173-49d0-8d8b-5da2bf651001"
+
+fast_transient_ztf_filter_name = "fast_transient_ztf"
+fast_transient_lsst_filter_name = "fast_transient_lsst"
 
 consumer = Consumer({
     'bootstrap.servers': 'localhost:9092',
