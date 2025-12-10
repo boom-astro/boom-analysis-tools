@@ -1,7 +1,7 @@
 import argparse
 import redis
 
-from tools.utils import fetch_mongo, log
+from utils import fetch_mongo, log
 
 
 def get_redis_queue(survey_name, process_type):
