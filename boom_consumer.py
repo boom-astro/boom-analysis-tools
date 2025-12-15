@@ -10,8 +10,16 @@ thumbnail_types = [
     ("cutoutDifference", "sub"),
 ]
 
-fast_transient_ztf_filter_name = "fast_transient_ztf"
-fast_transient_lsst_filter_name = "fast_transient_lsst"
+# To determine the filter passed, check the filter_name in the alert's filters field
+# Example filter names used in BOOM:
+# - fast_transient_ztf
+# - fast_transient_lsst
+# - galactic_fast_transient_ztf
+# - galactic_fast_transient_lsst
+# - crossmatch_ztf_ned
+# - crossmatch_lsst_ned
+# - crossmatch_ztf_lsst
+# - crossmatch_lsst_ztf
 
 consumer = Consumer({
     'bootstrap.servers': 'localhost:9092',
