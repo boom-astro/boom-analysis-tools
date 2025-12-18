@@ -8,3 +8,11 @@ redis
 matplotlib
 astropy
 slack_sdk
+pandas
+jax
+numpyro
+dustmaps
+dynesty
+scikit-learn
+git+https://github.com/VTDA-Group/superphot-plus.git
+git+https://github.com/kdesoto-astro/snapi.git
