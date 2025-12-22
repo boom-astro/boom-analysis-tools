@@ -40,8 +40,8 @@ if __name__ == "__main__":
         "--reprocess-type",
         type=str,
         choices=["enrichment+filter", "filter"],
-        default="enrichment+filter",
-        help="The type of reprocessing to perform (default: enrichment+filter)."
+        default="filter",
+        help="The type of reprocessing to perform (default: filter)."
     )
     parser.add_argument(
         "--batch-size",
