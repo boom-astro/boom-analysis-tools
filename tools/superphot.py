@@ -17,6 +17,8 @@ dustmaps.sfd.fetch()
 
 warnings.simplefilter("ignore", category=InconsistentVersionWarning)
 
+MODELS_PATH = "data/models/"
+
 def process_photometry(cand_info, source):
     """
     Process photometry data from candidate information into a pandas DataFrame.
@@ -195,10 +197,6 @@ def run_superphot(ztf_id):
     )
     
     redshift = np.nan
-    
-    # Calculate peak absolute magnitude
-    phot_abs = phot.absolute(redshift)
-    peak_abs_mag = phot_abs.detections.mag.dropna().min()
 
     # Normalize photometry
     phot.normalize(inplace=True)
@@ -215,13 +213,15 @@ def run_superphot(ztf_id):
         'upper_limit': False
     }
 
+
     for lc in phot.light_curves:
         padded_lc = lc.pad(fill, num_pad - len(lc.detections))
         padded_lcs.append(padded_lc)
     padded_phot = Photometry.from_light_curves(padded_lcs)
 
+
     # Load priors and fit using SVI sampler
-    priors = SuperphotPrior.load('data/models/global_priors_hier_svi')
+    priors = SuperphotPrior.load(f'{MODELS_PATH}/global_priors_hier_svi')
     random_seed = 42
 
     svi_sampler = SVISampler(
@@ -262,18 +262,12 @@ def run_superphot(ztf_id):
     event_dict['name'] = ztf_id
     uncorr_fits.index = [event_dict['name']] * len(uncorr_fits)
 
-    
-
     # Load classification models
-    full_model_fn = "../../data/models/model_superphot_full.pt"
-    early_model_fn = "../../data/models/model_superphot_early.pt"
-    full_model_fn_z = "../../data/models/model_superphot_redshift.pt"
-    early_model_fn_z = "../../data/models/model_superphot_early_redshift.pt"
+    full_model_fn = f"{MODELS_PATH}/model_superphot_full.pt"
+    early_model_fn = f"{MODELS_PATH}/model_superphot_early.pt"
 
     full_model = SuperphotLightGBM.load(full_model_fn)
     early_model = SuperphotLightGBM.load(early_model_fn)
-    full_model_z = SuperphotLightGBM.load(full_model_fn_z)
-    early_model_z = SuperphotLightGBM.load(early_model_fn_z)
 
     # Classify using appropriate model (early vs. full phase)
     if len(valid_fits[early_fit_mask]) > len(valid_fits[~early_fit_mask]):
@@ -297,7 +291,6 @@ def run_superphot(ztf_id):
     event_dict['superphot_plus_classified'] = True
 
     if event_dict['superphot_plus_prob'] > 0.5:
-
         # Generate diagnostic plot
         fig, ax = plt.subplots(figsize=(8, 6))
         formatter = Formatter()
@@ -317,5 +310,3 @@ def run_superphot(ztf_id):
         plt.savefig(f"superphot_results/{ztf_id}_superphot.png")
 
     return None
-
-run_superphot('ZTF18abwnucp')
