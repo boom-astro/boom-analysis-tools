@@ -2,7 +2,7 @@ import time
 import json
 
 from confluent_kafka import Consumer
-from tools.utils import read_avro
+from utils.avro import read_avro
 
 thumbnail_types = [
     ("cutoutScience", "new"),
