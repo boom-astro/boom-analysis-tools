@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from logger import log
+from utils.logger import log
 
 def fetch_mongo(collection_name, url="mongodb://localhost:27017", db_name="boom"):
     """
