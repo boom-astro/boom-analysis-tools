@@ -2,10 +2,12 @@ import os
 import time
 import json
 
-from confluent_kafka import Consumer
-from api import SkyPortal
-from utils import read_avro, log
 from dotenv import load_dotenv
+from confluent_kafka import Consumer
+
+from utils.skyportal_api import SkyPortal
+from utils.logger import log
+from utils.avro import read_avro
 
 load_dotenv()
 
@@ -45,6 +47,8 @@ def consume():
             # Check if the alert passed any of the filters in the map
             for filter in record.get("filters", []):
                 filter_name = filter.get("filter_name")
+                if "filter_name" in filter:
+                    print(filter_name)
                 if filter_name in filter_to_group_map:
                     group_id = filter_to_group_map[filter_name]
                     skyportal.save_to_groups(
