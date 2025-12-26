@@ -1,6 +1,8 @@
 # boom-analysis-tools
-This repository contains a script to consume BOOM Kafka alerts and some filters used on the BOOM brokers.
-It also includes a set of tools to manage and analyze BOOM outputs and take appropriate actions.
+This repository contains:
+- a Kafka consumer for BOOM alerts
+- MongoDB query filters (JSON files) used by the BOOM broker
+- tools to manage, analyze, and take appropriate actions on BOOM outputs.
 
 ## Boom Kafka Alerts Consumer
 
