@@ -1,11 +1,10 @@
 import io
 import json
 import math
-
 import matplotlib.pyplot as plt
-from astropy.time import Time
 
-from tools.utils import fetch_mongo
+from astropy.time import Time
+from utils.mongo import fetch_mongo
 
 def build_ztf_photometry(data):
     processed = []
