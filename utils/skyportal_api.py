@@ -2,7 +2,7 @@ import functools
 import time
 import requests
 
-from utils import log, RED, YELLOW, GREEN, ENDC
+from logger import log, RED, YELLOW, GREEN, ENDC
 
 SLOW_RESPONSE_THRESHOLD = 5  # seconds
 
