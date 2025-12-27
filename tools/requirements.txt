@@ -1,0 +1,15 @@
+# Core dependencies
+-r ../requirements.txt
+
+# Tools dependencies
+snappy
+cramjam
+redis
+matplotlib
+astropy
+pandas
+jax==0.5
+numpyro
+dustmaps
+dynesty
+scikit-learn
