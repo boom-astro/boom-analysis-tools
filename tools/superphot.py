@@ -1,3 +1,4 @@
+import argparse
 import warnings
 import dustmaps.sfd
 import pandas as pd
@@ -11,7 +12,7 @@ from superphot_plus.priors import SuperphotPrior
 from superphot_plus.model import SuperphotLightGBM
 from snapi import Photometry, Formatter
 from sklearn.exceptions import InconsistentVersionWarning
-from utils import fetch_mongo
+from utils.mongo import fetch_mongo
 
 dustmaps.sfd.fetch()
 
@@ -310,3 +311,19 @@ def run_superphot(ztf_id):
         plt.savefig(f"superphot_results/{ztf_id}_superphot.png")
 
     return None
+
+if __name__ == "__main__":
+    # --- CLI arguments ---
+    parser = argparse.ArgumentParser(
+        description=(
+            "Run Superphot Plus on a specified object ID from Boom's MongoDB."
+        )
+    )
+    parser.add_argument(
+        "--object-id",
+        type=str,
+        default="ZTF18abwvfof",
+        help="The object ID to run Superphot Plus on."
+    )
+    args = parser.parse_args()
+    run_superphot(args.object_id)
