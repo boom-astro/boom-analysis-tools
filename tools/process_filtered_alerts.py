@@ -47,8 +47,6 @@ def consume():
             # Check if the alert passed any of the filters in the map
             for filter in record.get("filters", []):
                 filter_name = filter.get("filter_name")
-                if "filter_name" in filter:
-                    print(filter_name)
                 if filter_name in filter_to_group_map:
                     group_id = filter_to_group_map[filter_name]
                     skyportal.save_to_groups(
