@@ -50,16 +50,15 @@ This tool consume specified filtered alerts from the BOOM Kafka broker and save 
 Set the `SKYPORTAL_URL`, `SKYPORTAL_API_KEY`, `TOPIC`, `ANNOTATION_ORIGIN` and `FILTER_TO_GROUP_MAP` environment variables.
 Then run:
 ```
-python -m tools.process_filtered_alerts.py
+python -m tools.process_filtered_alerts
 ```
 
 ### Reprocess alerts
 This tool reprocesses alerts in Boom by pushing them back to a Redis queue. You can choose to reprocess only the filtering step, or the enrichment and filtering steps.
 Run the script with the desired options:
 ```
-python -m tools.reprocess_alerts.py --survey-name <ZTF|LSST|DECAM> --reprocess-type <enrichment+filter|filter> --batch-size <number>
+python -m tools.reprocess_alerts --survey-name <ZTF|LSST|DECAM> --reprocess-type <enrichment+filter|filter> --batch-size <number>
 ```
-
 
 ### Superphot
 This tool generates superphot light curves for specified objects in the BOOM database.
@@ -73,5 +72,5 @@ pip install git+https://github.com/kdesoto-astro/snapi.git@39ac8aa0c
 
 Run the script with the desired options:
 ```
-python -m tools.superphot.py --object-id <object_id>
+python -m tools.superphot --object-id <object_id>
 ```
