@@ -1,3 +1,4 @@
+import os
 import argparse
 import warnings
 import dustmaps.sfd
@@ -6,6 +7,7 @@ import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
 
+from contextlib import redirect_stdout, redirect_stderr
 from astropy.coordinates import SkyCoord
 from superphot_plus.samplers.numpyro_sampler import SVISampler
 from superphot_plus.priors import SuperphotPrior
@@ -231,7 +233,9 @@ def run_superphot(ztf_id):
         random_state=random_seed
     )
 
-    svi_sampler.fit_photometry(padded_phot, orig_num_times=orig_size)
+    # Avoid polluting output with fitting logs
+    with open(os.devnull, "w") as f, redirect_stdout(f), redirect_stderr(f):
+        svi_sampler.fit_photometry(padded_phot, orig_num_times=orig_size)
     res = svi_sampler.result
 
     # Store fit parameters
