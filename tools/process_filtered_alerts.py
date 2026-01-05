@@ -5,6 +5,7 @@ import json
 from dotenv import load_dotenv
 from confluent_kafka import Consumer
 
+from tools.superphot import run_superphot
 from utils.skyportal_api import SkyPortal
 from utils.logger import log
 from utils.avro import read_avro
@@ -48,6 +49,9 @@ def consume():
             for filter in record.get("filters", []):
                 filter_name = filter.get("filter_name")
                 if filter_name in filter_to_group_map:
+                    # Run superphot on every alert that passes the filter
+                    # run_superphot(record.get("objectId"))
+
                     group_id = filter_to_group_map[filter_name]
                     skyportal.save_to_groups(
                         record.get("objectId"),
