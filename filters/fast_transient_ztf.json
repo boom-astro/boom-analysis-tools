@@ -7,9 +7,6 @@
       "candidate.drb": {
         "$gt": 0.9
       },
-      "candidate.magpsf": {
-        "$lt": 99
-      },
       "candidate.ndethist": {
         "$lte": 200
       },
