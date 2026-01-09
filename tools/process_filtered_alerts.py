@@ -5,7 +5,7 @@ import json
 from dotenv import load_dotenv
 from confluent_kafka import Consumer
 
-from tools.superphot import run_superphot
+# from tools.superphot import run_superphot
 from utils.skyportal_api import SkyPortal
 from utils.logger import log
 from utils.avro import read_avro
