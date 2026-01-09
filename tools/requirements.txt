@@ -8,7 +8,7 @@ redis
 matplotlib
 astropy
 pandas
-jax==0.5
+jax
 numpyro
 dustmaps
 dynesty
