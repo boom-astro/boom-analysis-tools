@@ -61,6 +61,8 @@ def consume():
                     annotations = json.loads(filter.get("annotations"))
                     data={}
                     for band, photstat in annotations.get("photstats", {}).items():
+                        if not photstat:
+                            continue
                         data[f"{band}_band_peak_jd"] = photstat.get("peak_jd")
                         data[f"{band}_band_peak_mag"] = photstat.get("peak_mag")
                         if photstat.get("fading") is not None:
