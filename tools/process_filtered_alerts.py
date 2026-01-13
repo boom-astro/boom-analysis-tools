@@ -27,6 +27,7 @@ consumer = Consumer({
     "session.timeout.ms": 6000,  # Session timeout for the consumer
     "max.poll.interval.ms": 300000,  # Maximum time between polls
     "security.protocol": "PLAINTEXT",  # Use PLAINTEXT if no authentication
+    'log_level': 5, # Lower log level to avoid `Disconnected` spam when Kafka is down
 })
 consumer.subscribe([topic])
 
