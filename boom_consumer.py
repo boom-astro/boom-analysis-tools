@@ -1,8 +1,12 @@
+import os
 import time
 import json
 
-from confluent_kafka import Consumer
+from dotenv import load_dotenv
 from utils.avro import read_avro
+from confluent_kafka import Consumer
+
+load_dotenv()
 
 thumbnail_types = [
     ("cutoutScience", "new"),
@@ -15,23 +19,28 @@ thumbnail_types = [
 # - fast_transient_ztf
 # - fast_transient_lsst
 # - galactic_fast_transient_ztf
-# - galactic_fast_transient_lsst
-# - crossmatch_ztf_ned
-# - crossmatch_lsst_ned
 # - crossmatch_ztf_lsst
-# - crossmatch_lsst_ztf
 
-consumer = Consumer({
-    'bootstrap.servers': 'localhost:9092',
+config = {
+    'bootstrap.servers': os.getenv("BOOM_KAFKA_SERVERS"),
     'group.id': f'umn_boom_kafka_consumer_group_{int(time.time())}',
     'auto.offset.reset': 'earliest',
-    "enable.auto.commit": False,  # Disable auto-commit of offsets
-    "session.timeout.ms": 6000,  # Session timeout for the consumer
-    "max.poll.interval.ms": 300000,  # Maximum time between polls
-    "security.protocol": "PLAINTEXT",  # Use PLAINTEXT if no authentication
-})
-topic = 'LSST_alerts_results'
-topic = 'ZTF_alerts_results'
+    "enable.auto.commit": False,
+    "session.timeout.ms": 6000,
+    "max.poll.interval.ms": 300000,
+}
+if os.getenv("BOOM_KAFKA_USERNAME") and os.getenv("BOOM_KAFKA_PASSWORD"):
+    config.update({
+        "security.protocol": "SASL_PLAINTEXT",
+        "sasl.mechanism": "SCRAM-SHA-512",
+        "sasl.username": os.getenv("BOOM_KAFKA_USERNAME"),
+        "sasl.password": os.getenv("BOOM_KAFKA_PASSWORD"),
+    })
+else:
+    config["security.protocol"] = "PLAINTEXT"
+consumer = Consumer(config)
+
+topic = os.getenv("BOOM_KAFKA_TOPIC")
 consumer.subscribe([topic])
 print(f"Subscribed to topic: {topic}")
 
