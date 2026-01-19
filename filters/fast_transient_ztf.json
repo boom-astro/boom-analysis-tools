@@ -47,8 +47,21 @@
                   }
                 },
                 {
-                  "properties.photstats.r.fading.r_squared": {
-                    "$gte": 0.5
+                  "properties.photstats.r.fading.red_chi2": {
+                    "$lte": 2.0
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.photstats.r.fading.rate",
+                          "$properties.photstats.r.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
                   }
                 }
               ]
@@ -61,8 +74,21 @@
                   }
                 },
                 {
-                  "properties.photstats.g.fading.r_squared": {
-                    "$gte": 0.5
+                  "properties.photstats.g.fading.red_chi2": {
+                    "$lte": 2.0
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.photstats.g.fading.rate",
+                          "$properties.photstats.g.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
                   }
                 }
               ]
