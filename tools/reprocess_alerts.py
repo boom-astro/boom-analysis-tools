@@ -58,13 +58,34 @@ if __name__ == "__main__":
         default=10000,
         help="The number of alerts to push to Redis in each batch (default: 10000)."
     )
+    parser.add_argument(
+        "--mongo-uri",
+        type=str,
+        default="mongodb://localhost:27017",
+        help="The MongoDB connection URI (default: mongodb://localhost:27017)."
+    )
+    parser.add_argument(
+        "--redis-host",
+        type=str,
+        default="localhost",
+        help="The Redis server host (default: localhost)."
+    )
+    parser.add_argument(
+        "--redis-port",
+        type=int,
+        default=6379,
+        help="The Redis server port (default: 6379)."
+    )
     args = parser.parse_args()
     survey_name = args.survey_name
     period = args.period
     reprocess_type = args.reprocess_type
     batch_size = args.batch_size
+    mongo_uri = args.mongo_uri
+    redis_host = args.redis_host
+    redis_port = args.redis_port
 
-    alerts_collection = fetch_mongo(f"{survey_name}_alerts")
+    alerts_collection = fetch_mongo(f"{survey_name}_alerts", url=mongo_uri)
     # Build query filter based on period
     query_filter = {}
     if period:
@@ -87,7 +108,7 @@ if __name__ == "__main__":
 
     batch = []
     count = 0
-    redis = redis.Redis(host="localhost", port=6379, db=0)
+    redis_client = redis.Redis(host=redis_host, port=redis_port, db=0)
     redis_queue = get_redis_queue(survey_name, reprocess_type)
     for alert in alerts_collection.find(query_filter):
         # For ZTF filter reprocessing, we need both programid and alert id
@@ -99,7 +120,7 @@ if __name__ == "__main__":
         count += 1
 
         if len(batch) >= batch_size or count == nb_alerts:
-            redis.lpush(redis_queue, *batch)
+            redis_client.lpush(redis_queue, *batch)
             log(f"{count}/{nb_alerts} alerts processed.")
             batch = []
 
