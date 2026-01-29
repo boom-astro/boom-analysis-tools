@@ -5,3 +5,4 @@ fastavro
 pymongo
 slack_sdk
 python-dotenv
+astropy

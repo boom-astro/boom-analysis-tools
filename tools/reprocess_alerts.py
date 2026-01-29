@@ -1,9 +1,9 @@
 import argparse
 import redis
 
+from astropy.time import Time
 from utils.mongo import fetch_mongo
 from utils.logger import log
-from datetime import datetime, timedelta
 
 
 def get_redis_queue(survey_name, process_type):
@@ -39,11 +39,18 @@ if __name__ == "__main__":
         help="The survey name (default: ZTF)."
     )
     parser.add_argument(
-        "--period",
+        "--created-after",
         type=float,
-        metavar="DAYS",
+        metavar="JD",
         default=None,
-        help="Reprocess alerts from the last N days (default: all alerts)."
+        help="Reprocess alerts created after the given Julian Date (default: all alerts)."
+    )
+    parser.add_argument(
+        "--observed-after",
+        type=float,
+        metavar="JD",
+        default=None,
+        help="Reprocess alerts observed after the given Julian Date (default: all alerts)."
     )
     parser.add_argument(
         "--reprocess-type",
@@ -78,7 +85,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     survey_name = args.survey_name
-    period = args.period
+    created_after = args.created_after
+    observed_after = args.observed_after
     reprocess_type = args.reprocess_type
     batch_size = args.batch_size
     mongo_uri = args.mongo_uri
@@ -88,14 +96,22 @@ if __name__ == "__main__":
     alerts_collection = fetch_mongo(f"{survey_name}_alerts", url=mongo_uri)
     # Build query filter based on period
     query_filter = {}
-    if period:
-        cutoff_date = datetime.utcnow() - timedelta(days=period)
-        # Convert Unix timestamp to Julian Date: JD = (Unix timestamp / 86400) + 2440587.5
-        cutoff_jd = (cutoff_date.timestamp() / 86400) + 2440587.5
-        query_filter["created_at"] = {"$gte": cutoff_jd}
-        log(f"Filtering alerts created after JD {cutoff_jd} ({cutoff_date.isoformat()}) (last {period} days).")
-
-    nb_alerts = alerts_collection.count_documents(query_filter)
+    if created_after or observed_after:
+        if created_after:
+            query_filter["created_at"] = {"$gte": created_after}
+            log(f"Filtering alerts created after JD {created_after} ({Time(created_after, format='jd').iso[:19]})")
+        if observed_after:
+            query_filter["candidate.jd"] = {"$gte": observed_after}
+            log(f"Filtering alerts observed after JD {observed_after} ({Time(observed_after, format='jd').iso[:19]})")
+            nb_alerts = alerts_collection.count_documents(query_filter)
+        else:
+            log(
+                "Since filtering is performed only on created_at (and not on candidate.jd, which is indexed), "
+                "the count and find queries may be very slow to run. Therefore, the count step is skipped."
+            )
+            nb_alerts = "unknown"
+    else:
+        nb_alerts = alerts_collection.estimated_document_count()
     if nb_alerts == 0:
         log("No alerts found matching the criteria. Exiting.")
         exit(0)
