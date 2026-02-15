@@ -26,8 +26,6 @@ config = {
     'group.id': f'umn_boom_kafka_consumer_group_{int(time.time())}',
     'auto.offset.reset': 'earliest',
     "enable.auto.commit": False,
-    "session.timeout.ms": 6000,
-    "max.poll.interval.ms": 300000,
 }
 if os.getenv("BOOM_KAFKA_USERNAME") and os.getenv("BOOM_KAFKA_PASSWORD"):
     config.update({
@@ -48,6 +46,7 @@ print(f"Subscribed to topic: {topic}")
 def consume():
     print("Listening for messages...")
     alerts = []
+    count = 0
     try:
         while True:
             msg = consumer.poll(timeout=10.0)
@@ -57,6 +56,11 @@ def consume():
             if msg.error():
                 print(f"Consumer error: {msg.error()}")
                 continue
+
+            if count % 1000 == 0:
+                print(f"Processed {count} messages")
+            count += 1
+
             record = read_avro(msg)
 
             # Remove cutouts to improve readability, you can remove this block to keep them
@@ -64,7 +68,7 @@ def consume():
                 del record[cutout_type]
 
             # Save the first alert to a JSON file for inspection of its structure
-            if len(alerts) == 0:
+            if count == 1:
                 with open("first_alert.json", "w") as f:
                     json.dump(record, f, indent=2)
 
@@ -73,7 +77,7 @@ def consume():
     except KeyboardInterrupt:
         pass
     finally:
-        print(f"Processed {len(alerts)} messages")
+        print(f"Processed {count} messages")
         consumer.close()
 
 if __name__ == "__main__":
