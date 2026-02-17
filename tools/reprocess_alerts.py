@@ -100,16 +100,24 @@ if __name__ == "__main__":
         if created_after:
             query_filter["created_at"] = {"$gte": created_after}
             log(f"Filtering alerts created after JD {created_after} ({Time(created_after, format='jd').iso[:19]})")
+
         if observed_after:
             query_filter["candidate.jd"] = {"$gte": observed_after}
             log(f"Filtering alerts observed after JD {observed_after} ({Time(observed_after, format='jd').iso[:19]})")
             nb_alerts = alerts_collection.count_documents(query_filter)
         else:
             log(
-                "Since filtering is performed only on created_at (and not on candidate.jd, which is indexed), "
-                "the count and find queries may be very slow to run. Therefore, the count step is skipped."
+                f"{YELLOW}Since filtering is performed only on created_at (and not on candidate.jd, which is indexed), "
+                f"the count and find queries may be very slow to run. Therefore, the count step will be aborted after 6 seconds.{ENDC}"
             )
-            nb_alerts = "unknown"
+            try:
+                nb_alerts = alerts_collection.count_documents(
+                    query_filter,
+                    maxTimeMS=6000  # 6 secondes timeout
+                )
+            except Exception as e:
+                log(f"{YELLOW}Count aborted after 6 seconds.{ENDC}")
+                nb_alerts = "X"
     else:
         nb_alerts = alerts_collection.estimated_document_count()
     if nb_alerts == 0:
