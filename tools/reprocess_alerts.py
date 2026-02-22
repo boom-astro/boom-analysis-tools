@@ -1,10 +1,13 @@
+import os
 import argparse
 import redis
 
+from dotenv import load_dotenv
 from astropy.time import Time
 from utils.mongo import fetch_mongo
 from utils.logger import log, YELLOW, ENDC
 
+load_dotenv()
 
 def get_redis_queue(survey, process_type):
     """
@@ -56,7 +59,7 @@ if __name__ == "__main__":
         "--reprocess-type",
         type=str,
         choices=["enrichment+filter", "filter"],
-        default="filter",
+        default="enrichment+filter",
         help="The type of reprocessing to perform (default: filter)."
     )
     parser.add_argument(
@@ -68,8 +71,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mongo-uri",
         type=str,
-        default="mongodb://localhost:27017",
-        help="The MongoDB connection URI (default: mongodb://localhost:27017)."
+        default=os.getenv("BOOM_MONGO_URI", "mongodb://localhost:27017"),
+        help="The MongoDB connection URI can be set via the BOOM_MONGO_URI environment variable (default: mongodb://localhost:27017)."
     )
     parser.add_argument(
         "--redis-host",
@@ -106,17 +109,16 @@ if __name__ == "__main__":
             log(f"Filtering alerts observed after JD {observed_after} ({Time(observed_after, format='jd').iso[:19]})")
             nb_alerts = alerts_collection.count_documents(query_filter)
         else:
-            log(
-                f"{YELLOW}Since filtering is performed only on created_at (and not on candidate.jd, which is indexed), "
-                f"the count and find queries may be very slow to run. Therefore, the count step will be aborted after 6 seconds.{ENDC}"
-            )
             try:
                 nb_alerts = alerts_collection.count_documents(
                     query_filter,
                     maxTimeMS=6000  # 6 secondes timeout
                 )
             except Exception as e:
-                log(f"{YELLOW}Count aborted after 6 seconds.{ENDC}")
+                log(
+                    f"{YELLOW}Since filtering is performed only on created_at (and not on candidate.jd, which is indexed), "
+                    f"the count and find queries may be very slow to run. Therefore, the count step was aborted after 6 seconds."
+                )
                 nb_alerts = "X"
     else:
         nb_alerts = alerts_collection.estimated_document_count()
