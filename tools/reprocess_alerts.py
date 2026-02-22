@@ -6,12 +6,12 @@ from utils.mongo import fetch_mongo
 from utils.logger import log, YELLOW, ENDC
 
 
-def get_redis_queue(survey_name, process_type):
+def get_redis_queue(survey, process_type):
     """
     Get the name of a Boom Redis queue based on the survey name and process type.
 
     Args:
-        survey_name (str): The survey name, e.g., "ZTF", "LSST", or "DECAM".
+        survey (str): The survey name, e.g., "ZTF", "LSST", or "DECAM".
         process_type (str): The type of process, e.g., "packet", "enrichment+filter", or "filter".
 
     Returns:
@@ -19,7 +19,7 @@ def get_redis_queue(survey_name, process_type):
     """
     if process_type== "enrichment+filter":
         process_type = "enrichment" # After enrichment, alerts go to the filter queue
-    return f"{survey_name}_alerts_{process_type}_queue"
+    return f"{survey}_alerts_{process_type}_queue"
 
 
 if __name__ == "__main__":
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         )
     )
     parser.add_argument(
-        "--survey-name",
+        "--survey",
         type=str,
         choices=["ZTF", "LSST", "DECAM"],
         default="ZTF",
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         help="The Redis server port (default: 6379)."
     )
     args = parser.parse_args()
-    survey_name = args.survey_name
+    survey = args.survey
     created_after = args.created_after
     observed_after = args.observed_after
     reprocess_type = args.reprocess_type
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     redis_host = args.redis_host
     redis_port = args.redis_port
 
-    alerts_collection = fetch_mongo(f"{survey_name}_alerts", url=mongo_uri)
+    alerts_collection = fetch_mongo(f"{survey}_alerts", url=mongo_uri)
     # Build query filter based on period
     query_filter = {}
     if created_after or observed_after:
@@ -125,7 +125,7 @@ if __name__ == "__main__":
         exit(0)
 
     log(
-        f"Reprocessing {nb_alerts} alerts from survey '{survey_name}' using '{reprocess_type}' pipeline."
+        f"Reprocessing {nb_alerts} alerts from survey '{survey}' using '{reprocess_type}' pipeline."
     )
 
     log(f"Starting to push alerts to Redis queue in batches of {batch_size}...")
@@ -133,10 +133,10 @@ if __name__ == "__main__":
     batch = []
     count = 0
     redis_client = redis.Redis(host=redis_host, port=redis_port, db=0)
-    redis_queue = get_redis_queue(survey_name, reprocess_type)
+    redis_queue = get_redis_queue(survey, reprocess_type)
     for alert in alerts_collection.find(query_filter):
         # For ZTF filter reprocessing, we need both programid and alert id
-        if reprocess_type == "filter" and survey_name == "ZTF":
+        if reprocess_type == "filter" and survey == "ZTF":
             batch.append(f"{alert['candidate']['programid']},{alert['_id']}")
         else:
             batch.append(alert["_id"])
