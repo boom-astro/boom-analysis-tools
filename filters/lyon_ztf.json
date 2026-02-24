@@ -18,6 +18,11 @@
           }
         },
         {
+          "candidate.dec": {
+            "$lte": 30
+          }
+        },
+        {
           "properties.stationary": {
             "$eq": true
           }
@@ -35,11 +40,6 @@
         {
           "properties.star": {
             "$eq": false
-          }
-        },
-        {
-          "candidate.ndethist": {
-            "$gte": 5
           }
         },
         {
@@ -119,119 +119,6 @@
             }
           ],
           "default": "$candidate.distpsnr1"
-        }
-      },
-      "n_det_g": {
-        "$size": {
-          "$filter": {
-            "input": {
-              "$ifNull": [
-                "$prv_candidates",
-                []
-              ]
-            },
-            "cond": {
-              "$and": [
-                {
-                  "$eq": [
-                    "$$this.fid",
-                    1
-                  ]
-                },
-                {
-                  "$eq": [
-                    "$$this.isdiffpos",
-                    true
-                  ]
-                },
-                {
-                  "$gt": [
-                    "$$this.magpsf",
-                    0
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      },
-      "n_det_r": {
-        "$size": {
-          "$filter": {
-            "input": {
-              "$ifNull": [
-                "$prv_candidates",
-                []
-              ]
-            },
-            "cond": {
-              "$and": [
-                {
-                  "$eq": [
-                    "$$this.fid",
-                    2
-                  ]
-                },
-                {
-                  "$eq": [
-                    "$$this.isdiffpos",
-                    true
-                  ]
-                },
-                {
-                  "$gt": [
-                    "$$this.magpsf",
-                    0
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      },
-      "age_days": {
-        "$subtract": [
-          "$candidate.jd",
-          "$candidate.jdstarthist"
-        ]
-      },
-      "n_unique_nights": {
-        "$size": {
-          "$setUnion": [
-            {
-              "$map": {
-                "input": {
-                  "$filter": {
-                    "input": {
-                      "$ifNull": [
-                        "$prv_candidates",
-                        []
-                      ]
-                    },
-                    "cond": {
-                      "$and": [
-                        {
-                          "$eq": [
-                            "$$this.isdiffpos",
-                            true
-                          ]
-                        },
-                        {
-                          "$gt": [
-                            "$$this.magpsf",
-                            0
-                          ]
-                        }
-                      ]
-                    }
-                  }
-                },
-                "in": {
-                  "$floor": "$$this.jd"
-                }
-              }
-            }
-          ]
         }
       }
     }
@@ -881,12 +768,12 @@
                   "$or": [
                     {
                       "coordinates.b": {
-                        "$lte": -15
+                        "$lte": -7
                       }
                     },
                     {
                       "coordinates.b": {
-                        "$gte": 15
+                        "$gte": 7
                       }
                     }
                   ]
@@ -1106,43 +993,6 @@
               }
             }
           ]
-        },
-        {
-          "$and": [
-            {
-              "n_det_g": {
-                "$gte": 1
-              }
-            },
-            {
-              "n_det_r": {
-                "$gte": 1
-              }
-            },
-            {
-              "$expr": {
-                "$gte": [
-                  {
-                    "$add": [
-                      "$n_det_g",
-                      "$n_det_r"
-                    ]
-                  },
-                  3
-                ]
-              }
-            },
-            {
-              "age_days": {
-                "$lt": 180
-              }
-            },
-            {
-              "n_unique_nights": {
-                "$gte": 2
-              }
-            }
-          ]
         }
       ]
     }
@@ -1216,11 +1066,7 @@
       "dets_jd_810_900": 1,
       "prv_nd_gt90dago": 1,
       "jd_min_prv": 1,
-      "distpsnr1_switch": 1,
-      "n_det_g": 1,
-      "n_det_r": 1,
-      "age_days": 1,
-      "n_unique_nights": 1
+      "distpsnr1_switch": 1
     }
   }
 ]

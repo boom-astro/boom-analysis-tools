@@ -5,7 +5,6 @@
         { "candidate.isdiffpos": { "$eq": true } },
         { "candidate.drb": { "$gte": 0.8 } },
         { "candidate.rb": { "$gte": 0.2 } },
-        { "candidate.dec": { "$lte": 30 } },
         { "properties.stationary": { "$eq": true } },
         { "properties.near_brightstar": { "$eq": false } },
         { "properties.rock": { "$eq": false } },
