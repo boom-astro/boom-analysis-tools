@@ -1,0 +1,1299 @@
+[
+  {
+    "$match": {
+      "$and": [
+        {
+          "candidate.reliability": {
+            "$gt": 0.5
+          }
+        },
+        {
+          "candidate.isdiffpos": {
+            "$eq": true
+          }
+        },
+        {
+          "candidate.ndethist": {
+            "$gte": 5
+          }
+        },
+        {
+          "candidate.ndethist": {
+            "$lt": 200
+          }
+        },
+        {
+          "properties.stationary": {
+            "$eq": true
+          }
+        },
+        {
+          "properties.near_brightstar": {
+            "$eq": false
+          }
+        },
+        {
+          "candidate.shape_flag": {
+            "$eq": false
+          }
+        },
+        {
+          "candidate.centroid_flag": {
+            "$eq": false
+          }
+        },
+        {
+          "candidate.pixelFlags": {
+            "$eq": false
+          }
+        },
+        {
+          "candidate.pixelFlags_saturatedCenter": {
+            "$eq": false
+          }
+        },
+        {
+          "candidate.ssObjectId": {
+            "$exists": false
+          }
+        },
+        {
+          "candidate.psfChi2": {
+            "$lt": 10000
+          }
+        }
+      ]
+    }
+  },
+  {
+    "$project": {
+      "objectId": 1,
+      "candidate.jd": 1,
+      "candidate.reliability": 1,
+      "candidate.dec": 1,
+      "coordinates.l": 1,
+      "coordinates.b": 1,
+      "candidate.isdiffpos": 1,
+      "candidate.ndethist": 1,
+      "properties.stationary": 1,
+      "properties.near_brightstar": 1,
+      "candidate.shape_flag": 1,
+      "candidate.centroid_flag": 1,
+      "candidate.pixelFlags": 1,
+      "candidate.pixelFlags_saturatedCenter": 1,
+      "candidate.ssObjectId": 1,
+      "candidate.extendedness": 1,
+      "candidate.psfChi2": 1,
+      "candidate.magpsf": 1,
+      "candidate.ra": 1,
+      "properties.photstats.g.fading.rate": 1,
+      "properties.photstats.g.fading.rate_error": 1,
+      "properties.photstats.r.rising.rate": 1,
+      "properties.photstats.r.rising.rate_error": 1,
+      "properties.photstats.g.rising.rate": 1,
+      "properties.photstats.g.rising.rate_error": 1,
+      "properties.photstats.g.peak_mag": 1,
+      "properties.photstats.r.peak_mag": 1,
+      "properties.photstats.i.peak_mag": 1,
+      "properties.multisurvey_photstats.u.peak_jd": 1,
+      "properties.multisurvey_photstats.g.peak_jd": 1,
+      "properties.multisurvey_photstats.r.peak_jd": 1,
+      "properties.multisurvey_photstats.i.peak_jd": 1,
+      "properties.multisurvey_photstats.z.peak_jd": 1,
+      "properties.multisurvey_photstats.y.peak_jd": 1,
+      "prv_candidates": 1,
+      "cross_matches.Gaia_DR3": 1,
+      "cross_matches.LSPSC": 1,
+      "cross_matches.CatWISE2020": 1,
+      "cross_matches.milliquas_v8": 1,
+      "cross_matches.2MASS_PSC": 1
+    }
+  },
+  {
+    "$addFields": {
+      "jd_min_prv": {
+        "$min": "$prv_candidates.jd"
+      },
+      "gaia_brightstar": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.Gaia_DR3",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$lte": [
+                    "$distance_arcsec",
+                    20
+                  ]
+                },
+                {
+                  "$lte": [
+                    "$phot_g_mean_mag",
+                    16
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "lspsc_star": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.LSPSC",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$gte": [
+                    "$score",
+                    0.7
+                  ]
+                },
+                {
+                  "$or": [
+                    {
+                      "$and": [
+                        {
+                          "$lte": [
+                            "$distance_arcsec",
+                            4
+                          ]
+                        },
+                        {
+                          "$lte": [
+                            "$mag_white",
+                            18
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$and": [
+                        {
+                          "$lte": [
+                            "$distance_arcsec",
+                            10
+                          ]
+                        },
+                        {
+                          "$lte": [
+                            "$mag_white",
+                            16
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$and": [
+                        {
+                          "$lte": [
+                            "$distance_arcsec",
+                            30
+                          ]
+                        },
+                        {
+                          "$lte": [
+                            "$mag_white",
+                            15
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$and": [
+                        {
+                          "$lte": [
+                            "$distance_arcsec",
+                            6
+                          ]
+                        },
+                        {
+                          "$lte": [
+                            "$mag_white",
+                            17.5
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "IsQuasar": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.milliquas_v8",
+                []
+              ]
+            },
+            "in": {
+              "$eq": [
+                "$Descrip",
+                "Q"
+              ]
+            }
+          }
+        }
+      },
+      "prv_magpsf_lt_22p5": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$prv_candidates",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$eq": [
+                    "$$this.isdiffpos",
+                    true
+                  ]
+                },
+                {
+                  "$lte": [
+                    "$$this.magpsf",
+                    22.5
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "n_det_g": {
+        "$size": {
+          "$filter": {
+            "input": {
+              "$ifNull": [
+                "$prv_candidates",
+                []
+              ]
+            },
+            "cond": {
+              "$and": [
+                {
+                  "$eq": [
+                    "$$this.band",
+                    "g"
+                  ]
+                },
+                {
+                  "$eq": [
+                    "$$this.isdiffpos",
+                    true
+                  ]
+                },
+                {
+                  "$gt": [
+                    "$$this.magpsf",
+                    0
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "n_det_r": {
+        "$size": {
+          "$filter": {
+            "input": {
+              "$ifNull": [
+                "$prv_candidates",
+                []
+              ]
+            },
+            "cond": {
+              "$and": [
+                {
+                  "$eq": [
+                    "$$this.band",
+                    "r"
+                  ]
+                },
+                {
+                  "$eq": [
+                    "$$this.isdiffpos",
+                    true
+                  ]
+                },
+                {
+                  "$gt": [
+                    "$$this.magpsf",
+                    0
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "age_days": {
+        "$subtract": [
+          "$candidate.jd",
+          {
+            "$min": "$prv_candidates.jd"
+          }
+        ]
+      },
+      "n_unique_nights": {
+        "$size": {
+          "$setUnion": [
+            {
+              "$map": {
+                "input": {
+                  "$filter": {
+                    "input": {
+                      "$ifNull": [
+                        "$prv_candidates",
+                        []
+                      ]
+                    },
+                    "cond": {
+                      "$and": [
+                        {
+                          "$eq": [
+                            "$$this.isdiffpos",
+                            true
+                          ]
+                        },
+                        {
+                          "$gt": [
+                            "$$this.magpsf",
+                            0
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "in": {
+                  "$floor": "$$this.jd"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "$addFields": {
+      "GaiaHighPMSNR3": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.Gaia_DR3",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$gt": [
+                    "$pm",
+                    3
+                  ]
+                },
+                {
+                  "$gt": [
+                    {
+                      "$divide": [
+                        "$$this.pm",
+                        {
+                          "$sqrt": {
+                            "$add": [
+                              {
+                                "$pow": [
+                                  "$$this.pmra_error",
+                                  2
+                                ]
+                              },
+                              {
+                                "$pow": [
+                                  "$$this.pmdec_error",
+                                  2
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    3
+                  ]
+                },
+                {
+                  "$lt": [
+                    {
+                      "$abs": {
+                        "$subtract": [
+                          "$candidate.ra",
+                          "$$this.ra"
+                        ]
+                      }
+                    },
+                    0.000277778
+                  ]
+                },
+                {
+                  "$lt": [
+                    {
+                      "$abs": {
+                        "$subtract": [
+                          "$candidate.dec",
+                          "$$this.dec"
+                        ]
+                      }
+                    },
+                    0.000277778
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "WiseW1W2_gt1": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.CatWISE2020",
+                []
+              ]
+            },
+            "in": {
+              "$gt": [
+                {
+                  "$subtract": [
+                    "$$this.w1mpro",
+                    "$$this.w2mpro"
+                  ]
+                },
+                1
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "$addFields": {
+      "prv_cand_90_bin_hist_arr": {
+        "$filter": {
+          "input": "$prv_candidates",
+          "cond": {
+            "$and": [
+              {
+                "$gt": [
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      "$jd_min_prv"
+                    ]
+                  },
+                  90
+                ]
+              },
+              {
+                "$eq": [
+                  "$$this.isdiffpos",
+                  true
+                ]
+              },
+              {
+                "$gt": [
+                  "$$this.magpsf",
+                  0
+                ]
+              },
+              {
+                "$lt": [
+                  "$$this.magpsf",
+                  99
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "TwoMassRedStarIR": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.2MASS_PSC",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$lte": [
+                    {
+                      "$sqrt": {
+                        "$add": [
+                          {
+                            "$pow": [
+                              {
+                                "$abs": {
+                                  "$subtract": [
+                                    "$candidate.ra",
+                                    "$$this.ra"
+                                  ]
+                                }
+                              },
+                              2
+                            ]
+                          },
+                          {
+                            "$pow": [
+                              {
+                                "$abs": {
+                                  "$subtract": [
+                                    "$candidate.dec",
+                                    "$$this.dec"
+                                  ]
+                                }
+                              },
+                              2
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    0.00027
+                  ]
+                },
+                {
+                  "$gt": [
+                    {
+                      "$subtract": [
+                        "$$this.h_m",
+                        "$$this.k_m"
+                      ]
+                    },
+                    -0.2
+                  ]
+                },
+                {
+                  "$lt": [
+                    {
+                      "$subtract": [
+                        "$$this.h_m",
+                        "$$this.k_m"
+                      ]
+                    },
+                    0.4
+                  ]
+                },
+                {
+                  "$lt": [
+                    {
+                      "$subtract": [
+                        "$$this.j_m",
+                        "$$this.k_m"
+                      ]
+                    },
+                    0.6
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "$addFields": {
+      "dets_jd_90_180": {
+        "$filter": {
+          "input": "$prv_cand_90_bin_hist_arr",
+          "cond": {
+            "$and": [
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      90
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      180
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "dets_jd_180_270": {
+        "$filter": {
+          "input": "$prv_cand_90_bin_hist_arr",
+          "cond": {
+            "$and": [
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      180
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      270
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "dets_jd_270_360": {
+        "$filter": {
+          "input": "$prv_cand_90_bin_hist_arr",
+          "cond": {
+            "$and": [
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      270
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      360
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "dets_jd_360_450": {
+        "$filter": {
+          "input": "$prv_cand_90_bin_hist_arr",
+          "cond": {
+            "$and": [
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      360
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      450
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "dets_jd_450_540": {
+        "$filter": {
+          "input": "$prv_cand_90_bin_hist_arr",
+          "cond": {
+            "$and": [
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      450
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      540
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "dets_jd_540_630": {
+        "$filter": {
+          "input": "$prv_cand_90_bin_hist_arr",
+          "cond": {
+            "$and": [
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      540
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      630
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "dets_jd_630_720": {
+        "$filter": {
+          "input": "$prv_cand_90_bin_hist_arr",
+          "cond": {
+            "$and": [
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      630
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      720
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "dets_jd_720_810": {
+        "$filter": {
+          "input": "$prv_cand_90_bin_hist_arr",
+          "cond": {
+            "$and": [
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      720
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      810
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "dets_jd_810_900": {
+        "$filter": {
+          "input": "$prv_cand_90_bin_hist_arr",
+          "cond": {
+            "$and": [
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      810
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      900
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "$addFields": {
+      "parallax": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.Gaia_DR3",
+                []
+              ]
+            },
+            "in": {
+              "$gt": [
+                {
+                  "$divide": [
+                    "$cross_matches.Gaia_EDR3.parallax",
+                    "$cross_matches.Gaia_EDR3.parallax_error"
+                  ]
+                },
+                5
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "$addFields": {
+      "gaiasnrgt5": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.Gaia_DR3",
+                []
+              ]
+            },
+            "in": {
+              "$gt": [
+                {
+                  "$abs": {
+                    "$divide": [
+                      "$$this.parallax",
+                      "$$this.parallax_error"
+                    ]
+                  }
+                },
+                5
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "$match": {
+      "$and": [
+        {
+          "$expr": {
+            "$isNumber": "$candidate.extendedness"
+          }
+        },
+        {
+          "gaia_brightstar": {
+            "$eq": false
+          }
+        },
+        {
+          "lspsc_star": {
+            "$eq": false
+          }
+        },
+        {
+          "$nor": [
+            {
+              "$and": [
+                {
+                  "WiseW1W2_gt1": {
+                    "$eq": true
+                  }
+                },
+                {
+                  "$and": [
+                    {
+                      "prv_cand_90_bin_hist_arr.50": {
+                        "$exists": true
+                      }
+                    },
+                    {
+                      "$or": [
+                        {
+                          "$and": [
+                            {
+                              "dets_jd_90_180.10": {
+                                "$exists": true
+                              }
+                            },
+                            {
+                              "dets_jd_180_270.10": {
+                                "$exists": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "$and": [
+                            {
+                              "dets_jd_180_270.10": {
+                                "$exists": true
+                              }
+                            },
+                            {
+                              "dets_jd_270_360.10": {
+                                "$exists": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "$and": [
+                            {
+                              "dets_jd_360_450.10": {
+                                "$exists": true
+                              }
+                            },
+                            {
+                              "dets_jd_450_540.10": {
+                                "$exists": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "$and": [
+                            {
+                              "dets_jd_540_630.10": {
+                                "$exists": true
+                              }
+                            },
+                            {
+                              "dets_jd_630_720.10": {
+                                "$exists": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "$and": [
+                            {
+                              "dets_jd_720_810.10": {
+                                "$exists": true
+                              }
+                            },
+                            {
+                              "dets_jd_810_900.10": {
+                                "$exists": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "$and": [
+                            {
+                              "dets_jd_450_540.10": {
+                                "$exists": true
+                              }
+                            },
+                            {
+                              "dets_jd_540_630.10": {
+                                "$exists": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "$and": [
+                            {
+                              "dets_jd_270_360.10": {
+                                "$exists": true
+                              }
+                            },
+                            {
+                              "dets_jd_360_450.10": {
+                                "$exists": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "$and": [
+                            {
+                              "dets_jd_630_720.10": {
+                                "$exists": true
+                              }
+                            },
+                            {
+                              "dets_jd_720_810.10": {
+                                "$exists": true
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "GaiaHighPMSNR3": {
+                "$eq": false
+              }
+            },
+            {
+              "IsQuasar": {
+                "$eq": false
+              }
+            },
+            {
+              "gaiasnrgt5": {
+                "$eq": false
+              }
+            },
+            {
+              "TwoMassRedStarIR": {
+                "$eq": false
+              }
+            }
+          ]
+        },
+        {
+          "$or": [
+            {
+              "candidate.magpsf": {
+                "$lte": 22.5
+              }
+            },
+            {
+              "prv_magpsf_lt_22p5": {
+                "$eq": true
+              }
+            }
+          ]
+        },
+        {
+          "$or": [
+            {
+              "coordinates.b": {
+                "$lte": -15
+              }
+            },
+            {
+              "coordinates.b": {
+                "$gte": 15
+              }
+            }
+          ]
+        },
+        {
+          "$expr": {
+            "$gt": [
+              {
+                "$abs": {
+                  "$subtract": [
+                    "$candidate.jd",
+                    "$jd_min_prv"
+                  ]
+                }
+              },
+              0.4
+            ]
+          }
+        },
+        {
+          "$and": [
+            {
+              "n_det_g": {
+                "$gte": 1
+              }
+            },
+            {
+              "n_det_r": {
+                "$gte": 1
+              }
+            },
+            {
+              "$expr": {
+                "$gte": [
+                  {
+                    "$add": [
+                      "$n_det_g",
+                      "$n_det_r"
+                    ]
+                  },
+                  3
+                ]
+              }
+            },
+            {
+              "age_days": {
+                "$lt": 180
+              }
+            },
+            {
+              "n_unique_nights": {
+                "$gte": 2
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "$project": {
+      "objectId": 1,
+      "candidate.jd": 1,
+      "candidate.reliability": 1,
+      "candidate.dec": 1,
+      "coordinates.l": 1,
+      "coordinates.b": 1,
+      "candidate.isdiffpos": 1,
+      "candidate.ndethist": 1,
+      "properties.stationary": 1,
+      "properties.near_brightstar": 1,
+      "candidate.shape_flag": 1,
+      "candidate.centroid_flag": 1,
+      "candidate.pixelFlags": 1,
+      "candidate.pixelFlags_saturatedCenter": 1,
+      "candidate.ssObjectId": 1,
+      "candidate.extendedness": 1,
+      "candidate.psfChi2": 1,
+      "candidate.magpsf": 1,
+      "candidate.ra": 1,
+      "properties.photstats.g.fading.rate": 1,
+      "properties.photstats.g.fading.rate_error": 1,
+      "properties.photstats.r.rising.rate": 1,
+      "properties.photstats.r.rising.rate_error": 1,
+      "properties.photstats.g.rising.rate": 1,
+      "properties.photstats.g.rising.rate_error": 1,
+      "properties.photstats.g.peak_mag": 1,
+      "properties.photstats.r.peak_mag": 1,
+      "properties.photstats.i.peak_mag": 1,
+      "properties.multisurvey_photstats.u.peak_jd": 1,
+      "properties.multisurvey_photstats.g.peak_jd": 1,
+      "properties.multisurvey_photstats.r.peak_jd": 1,
+      "properties.multisurvey_photstats.i.peak_jd": 1,
+      "properties.multisurvey_photstats.z.peak_jd": 1,
+      "properties.multisurvey_photstats.y.peak_jd": 1,
+      "prv_candidates": 1,
+      "cross_matches.Gaia_DR3": 1,
+      "cross_matches.LSPSC": 1,
+      "cross_matches.CatWISE2020": 1,
+      "cross_matches.milliquas_v8": 1,
+      "cross_matches.2MASS_PSC": 1,
+      "gaia_brightstar": 1,
+      "lspsc_star": 1,
+      "WiseW1W2_gt1": 1,
+      "prv_cand_90_bin_hist_arr": 1,
+      "dets_jd_90_180": 1,
+      "dets_jd_180_270": 1,
+      "dets_jd_270_360": 1,
+      "dets_jd_360_450": 1,
+      "dets_jd_450_540": 1,
+      "dets_jd_540_630": 1,
+      "dets_jd_630_720": 1,
+      "dets_jd_720_810": 1,
+      "dets_jd_810_900": 1,
+      "GaiaHighPMSNR3": 1,
+      "IsQuasar": 1,
+      "gaiasnrgt5": 1,
+      "TwoMassRedStarIR": 1,
+      "prv_magpsf_lt_22p5": 1,
+      "jd_min_prv": 1,
+      "parallax": 1,
+      "n_det_g": 1,
+      "n_det_r": 1,
+      "age_days": 1,
+      "n_unique_nights": 1
+    }
+  }
+]
