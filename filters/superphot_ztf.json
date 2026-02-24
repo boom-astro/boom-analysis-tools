@@ -2,15 +2,51 @@
   {
     "$match": {
       "$and": [
-        { "candidate.isdiffpos": { "$eq": true } },
-        { "candidate.drb": { "$gte": 0.8 } },
-        { "candidate.rb": { "$gte": 0.2 } },
-        { "properties.stationary": { "$eq": true } },
-        { "properties.near_brightstar": { "$eq": false } },
-        { "properties.rock": { "$eq": false } },
-        { "properties.star": { "$eq": false } },
-        { "candidate.ndethist": { "$gte": 5 } },
-        { "candidate.ndethist": { "$lte": 500 } }
+        {
+          "candidate.isdiffpos": {
+            "$eq": true
+          }
+        },
+        {
+          "candidate.drb": {
+            "$gte": 0.8
+          }
+        },
+        {
+          "candidate.rb": {
+            "$gte": 0.2
+          }
+        },
+        {
+          "properties.stationary": {
+            "$eq": true
+          }
+        },
+        {
+          "properties.near_brightstar": {
+            "$eq": false
+          }
+        },
+        {
+          "properties.rock": {
+            "$eq": false
+          }
+        },
+        {
+          "properties.star": {
+            "$eq": false
+          }
+        },
+        {
+          "candidate.ndethist": {
+            "$gte": 5
+          }
+        },
+        {
+          "candidate.ndethist": {
+            "$lte": 500
+          }
+        }
       ]
     }
   },
@@ -73,7 +109,12 @@
         "$switch": {
           "branches": [
             {
-              "case": { "$lt": ["$candidate.distpsnr1", 0] },
+              "case": {
+                "$lt": [
+                  "$candidate.distpsnr1",
+                  0
+                ]
+              },
               "then": 99
             }
           ],
@@ -83,12 +124,32 @@
       "n_det_g": {
         "$size": {
           "$filter": {
-            "input": { "$ifNull": ["$prv_candidates", []] },
+            "input": {
+              "$ifNull": [
+                "$prv_candidates",
+                []
+              ]
+            },
             "cond": {
               "$and": [
-                { "$eq": ["$$this.fid", 1] },
-                { "$eq": ["$$this.isdiffpos", true] },
-                { "$gt": ["$$this.magpsf", 0] }
+                {
+                  "$eq": [
+                    "$$this.fid",
+                    1
+                  ]
+                },
+                {
+                  "$eq": [
+                    "$$this.isdiffpos",
+                    true
+                  ]
+                },
+                {
+                  "$gt": [
+                    "$$this.magpsf",
+                    0
+                  ]
+                }
               ]
             }
           }
@@ -97,19 +158,42 @@
       "n_det_r": {
         "$size": {
           "$filter": {
-            "input": { "$ifNull": ["$prv_candidates", []] },
+            "input": {
+              "$ifNull": [
+                "$prv_candidates",
+                []
+              ]
+            },
             "cond": {
               "$and": [
-                { "$eq": ["$$this.fid", 2] },
-                { "$eq": ["$$this.isdiffpos", true] },
-                { "$gt": ["$$this.magpsf", 0] }
+                {
+                  "$eq": [
+                    "$$this.fid",
+                    2
+                  ]
+                },
+                {
+                  "$eq": [
+                    "$$this.isdiffpos",
+                    true
+                  ]
+                },
+                {
+                  "$gt": [
+                    "$$this.magpsf",
+                    0
+                  ]
+                }
               ]
             }
           }
         }
       },
       "age_days": {
-        "$subtract": ["$candidate.jd", "$candidate.jdstarthist"]
+        "$subtract": [
+          "$candidate.jd",
+          "$candidate.jdstarthist"
+        ]
       },
       "n_unique_nights": {
         "$size": {
@@ -118,16 +202,33 @@
               "$map": {
                 "input": {
                   "$filter": {
-                    "input": { "$ifNull": ["$prv_candidates", []] },
+                    "input": {
+                      "$ifNull": [
+                        "$prv_candidates",
+                        []
+                      ]
+                    },
                     "cond": {
                       "$and": [
-                        { "$eq": ["$$this.isdiffpos", true] },
-                        { "$gt": ["$$this.magpsf", 0] }
+                        {
+                          "$eq": [
+                            "$$this.isdiffpos",
+                            true
+                          ]
+                        },
+                        {
+                          "$gt": [
+                            "$$this.magpsf",
+                            0
+                          ]
+                        }
                       ]
                     }
                   }
                 },
-                "in": { "$floor": "$$this.jd" }
+                "in": {
+                  "$floor": "$$this.jd"
+                }
               }
             }
           ]
@@ -137,12 +238,24 @@
   },
   {
     "$addFields": {
-      "jd_min_prv": { "$min": "$prv_candidates.jd" },
+      "jd_min_prv": {
+        "$min": "$prv_candidates.jd"
+      },
       "IsQuasar": {
         "$anyElementTrue": {
           "$map": {
-            "input": { "$ifNull": ["$cross_matches.milliquas_v8", []] },
-            "in": { "$eq": ["$Descrip", "Q"] }
+            "input": {
+              "$ifNull": [
+                "$cross_matches.milliquas_v8",
+                []
+              ]
+            },
+            "in": {
+              "$eq": [
+                "$Descrip",
+                "Q"
+              ]
+            }
           }
         }
       }
@@ -153,18 +266,45 @@
       "bright_prv": {
         "$anyElementTrue": {
           "$map": {
-            "input": { "$ifNull": ["$prv_candidates", []] },
+            "input": {
+              "$ifNull": [
+                "$prv_candidates",
+                []
+              ]
+            },
             "in": {
               "$and": [
                 {
                   "$lt": [
-                    { "$abs": { "$subtract": ["$candidate.jd", "$$this.jd"] } },
+                    {
+                      "$abs": {
+                        "$subtract": [
+                          "$candidate.jd",
+                          "$$this.jd"
+                        ]
+                      }
+                    },
                     0.75
                   ]
                 },
-                { "$eq": ["$$this.isdiffpos", true] },
-                { "$gt": ["$$this.magpsf", 0] },
-                { "$lt": ["$$this.magpsf", 20.2] }
+                {
+                  "$eq": [
+                    "$$this.isdiffpos",
+                    true
+                  ]
+                },
+                {
+                  "$gt": [
+                    "$$this.magpsf",
+                    0
+                  ]
+                },
+                {
+                  "$lt": [
+                    "$$this.magpsf",
+                    20.2
+                  ]
+                }
               ]
             }
           }
@@ -173,10 +313,20 @@
       "GaiaHighPMSNR3": {
         "$anyElementTrue": {
           "$map": {
-            "input": { "$ifNull": ["$cross_matches.Gaia_DR3", []] },
+            "input": {
+              "$ifNull": [
+                "$cross_matches.Gaia_DR3",
+                []
+              ]
+            },
             "in": {
               "$and": [
-                { "$gt": ["$pm", 3] },
+                {
+                  "$gt": [
+                    "$pm",
+                    3
+                  ]
+                },
                 {
                   "$gt": [
                     {
@@ -185,8 +335,18 @@
                         {
                           "$sqrt": {
                             "$add": [
-                              { "$pow": ["$$this.pmra_error", 2] },
-                              { "$pow": ["$$this.pmdec_error", 2] }
+                              {
+                                "$pow": [
+                                  "$$this.pmra_error",
+                                  2
+                                ]
+                              },
+                              {
+                                "$pow": [
+                                  "$$this.pmdec_error",
+                                  2
+                                ]
+                              }
                             ]
                           }
                         }
@@ -197,13 +357,27 @@
                 },
                 {
                   "$lt": [
-                    { "$abs": { "$subtract": ["$candidate.ra", "$$this.ra"] } },
+                    {
+                      "$abs": {
+                        "$subtract": [
+                          "$candidate.ra",
+                          "$$this.ra"
+                        ]
+                      }
+                    },
                     0.000277778
                   ]
                 },
                 {
                   "$lt": [
-                    { "$abs": { "$subtract": ["$candidate.dec", "$$this.dec"] } },
+                    {
+                      "$abs": {
+                        "$subtract": [
+                          "$candidate.dec",
+                          "$$this.dec"
+                        ]
+                      }
+                    },
                     0.000277778
                   ]
                 }
@@ -215,10 +389,22 @@
       "gaiasnrgt5": {
         "$anyElementTrue": {
           "$map": {
-            "input": { "$ifNull": ["$cross_matches.Gaia_DR3", []] },
+            "input": {
+              "$ifNull": [
+                "$cross_matches.Gaia_DR3",
+                []
+              ]
+            },
             "in": {
               "$gt": [
-                { "$abs": { "$divide": ["$$this.parallax", "$$this.parallax_error"] } },
+                {
+                  "$abs": {
+                    "$divide": [
+                      "$$this.parallax",
+                      "$$this.parallax_error"
+                    ]
+                  }
+                },
                 5
               ]
             }
@@ -228,10 +414,20 @@
       "WiseW1W2_gt1": {
         "$anyElementTrue": {
           "$map": {
-            "input": { "$ifNull": ["$cross_matches.CatWISE2020", []] },
+            "input": {
+              "$ifNull": [
+                "$cross_matches.CatWISE2020",
+                []
+              ]
+            },
             "in": {
               "$gt": [
-                { "$subtract": ["$$this.w1mpro", "$$this.w2mpro"] },
+                {
+                  "$subtract": [
+                    "$$this.w1mpro",
+                    "$$this.w2mpro"
+                  ]
+                },
                 1
               ]
             }
@@ -246,14 +442,31 @@
               {
                 "$lt": [
                   "$$this.jd",
-                  { "$subtract": ["$candidate.jd", 90] }
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      90
+                    ]
+                  }
                 ]
               },
               {
                 "$or": [
-                  { "$eq": ["$$this.isdiffpos", false] },
-                  { "$isNumber": "$$this.magpsf" },
-                  { "$gt": ["$$this.magpsf", "$$this.diffmaglim"] }
+                  {
+                    "$eq": [
+                      "$$this.isdiffpos",
+                      false
+                    ]
+                  },
+                  {
+                    "$isNumber": "$$this.magpsf"
+                  },
+                  {
+                    "$gt": [
+                      "$$this.magpsf",
+                      "$$this.diffmaglim"
+                    ]
+                  }
                 ]
               }
             ]
@@ -269,17 +482,45 @@
           "input": "$prv_candidates",
           "cond": {
             "$and": [
-              { "$gt": [{ "$subtract": ["$candidate.jd", "$jd_min_prv"] }, 90] },
-              { "$eq": ["$$this.isdiffpos", true] },
-              { "$gt": ["$$this.magpsf", 0] },
-              { "$lt": ["$$this.magpsf", 99] }
+              {
+                "$gt": [
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      "$jd_min_prv"
+                    ]
+                  },
+                  90
+                ]
+              },
+              {
+                "$eq": [
+                  "$$this.isdiffpos",
+                  true
+                ]
+              },
+              {
+                "$gt": [
+                  "$$this.magpsf",
+                  0
+                ]
+              },
+              {
+                "$lt": [
+                  "$$this.magpsf",
+                  99
+                ]
+              }
             ]
           }
         }
       },
       "2MassRed": {
         "$anyElementTrue": {
-          "$ifNull": ["$cross_matches.2MASS_PSC", []]
+          "$ifNull": [
+            "$cross_matches.2MASS_PSC",
+            []
+          ]
         }
       }
     }
@@ -291,8 +532,28 @@
           "input": "$prv_cand_90_bin_hist_arr",
           "cond": {
             "$and": [
-              { "$lt": ["$jd", { "$subtract": ["$candidate.jd", 90] }] },
-              { "$gt": ["$jd", { "$subtract": ["$candidate.jd", 180] }] }
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      90
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      180
+                    ]
+                  }
+                ]
+              }
             ]
           }
         }
@@ -302,8 +563,28 @@
           "input": "$prv_cand_90_bin_hist_arr",
           "cond": {
             "$and": [
-              { "$lt": ["$jd", { "$subtract": ["$candidate.jd", 180] }] },
-              { "$gt": ["$jd", { "$subtract": ["$candidate.jd", 270] }] }
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      180
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      270
+                    ]
+                  }
+                ]
+              }
             ]
           }
         }
@@ -313,8 +594,28 @@
           "input": "$prv_cand_90_bin_hist_arr",
           "cond": {
             "$and": [
-              { "$lt": ["$jd", { "$subtract": ["$candidate.jd", 270] }] },
-              { "$gt": ["$jd", { "$subtract": ["$candidate.jd", 360] }] }
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      270
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      360
+                    ]
+                  }
+                ]
+              }
             ]
           }
         }
@@ -324,8 +625,28 @@
           "input": "$prv_cand_90_bin_hist_arr",
           "cond": {
             "$and": [
-              { "$lt": ["$jd", { "$subtract": ["$candidate.jd", 360] }] },
-              { "$gt": ["$jd", { "$subtract": ["$candidate.jd", 450] }] }
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      360
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      450
+                    ]
+                  }
+                ]
+              }
             ]
           }
         }
@@ -335,8 +656,28 @@
           "input": "$prv_cand_90_bin_hist_arr",
           "cond": {
             "$and": [
-              { "$lt": ["$jd", { "$subtract": ["$candidate.jd", 450] }] },
-              { "$gt": ["$jd", { "$subtract": ["$candidate.jd", 540] }] }
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      450
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      540
+                    ]
+                  }
+                ]
+              }
             ]
           }
         }
@@ -346,8 +687,28 @@
           "input": "$prv_cand_90_bin_hist_arr",
           "cond": {
             "$and": [
-              { "$lt": ["$jd", { "$subtract": ["$candidate.jd", 540] }] },
-              { "$gt": ["$jd", { "$subtract": ["$candidate.jd", 630] }] }
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      540
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      630
+                    ]
+                  }
+                ]
+              }
             ]
           }
         }
@@ -357,8 +718,28 @@
           "input": "$prv_cand_90_bin_hist_arr",
           "cond": {
             "$and": [
-              { "$lt": ["$jd", { "$subtract": ["$candidate.jd", 630] }] },
-              { "$gt": ["$jd", { "$subtract": ["$candidate.jd", 720] }] }
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      630
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      720
+                    ]
+                  }
+                ]
+              }
             ]
           }
         }
@@ -368,8 +749,28 @@
           "input": "$prv_cand_90_bin_hist_arr",
           "cond": {
             "$and": [
-              { "$lt": ["$jd", { "$subtract": ["$candidate.jd", 720] }] },
-              { "$gt": ["$jd", { "$subtract": ["$candidate.jd", 810] }] }
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      720
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      810
+                    ]
+                  }
+                ]
+              }
             ]
           }
         }
@@ -379,8 +780,28 @@
           "input": "$prv_cand_90_bin_hist_arr",
           "cond": {
             "$and": [
-              { "$lt": ["$jd", { "$subtract": ["$candidate.jd", 810] }] },
-              { "$gt": ["$jd", { "$subtract": ["$candidate.jd", 900] }] }
+              {
+                "$lt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      810
+                    ]
+                  }
+                ]
+              },
+              {
+                "$gt": [
+                  "$jd",
+                  {
+                    "$subtract": [
+                      "$candidate.jd",
+                      900
+                    ]
+                  }
+                ]
+              }
             ]
           }
         }
@@ -394,48 +815,128 @@
           "$and": [
             {
               "$or": [
-                { "candidate.magpsf": { "$lt": 20.2 } },
-                { "bright_prv": { "$eq": true } }
+                {
+                  "candidate.magpsf": {
+                    "$lt": 20.2
+                  }
+                },
+                {
+                  "bright_prv": {
+                    "$eq": true
+                  }
+                }
               ]
             },
             {
               "$and": [
-                { "GaiaHighPMSNR3": { "$eq": false } },
-                { "2MassRed": { "$eq": false } },
-                { "IsQuasar": { "$eq": false } },
-                { "gaiasnrgt5": { "$eq": false } }
+                {
+                  "GaiaHighPMSNR3": {
+                    "$eq": false
+                  }
+                },
+                {
+                  "2MassRed": {
+                    "$eq": false
+                  }
+                },
+                {
+                  "IsQuasar": {
+                    "$eq": false
+                  }
+                },
+                {
+                  "gaiasnrgt5": {
+                    "$eq": false
+                  }
+                }
               ]
             },
             {
               "$and": [
                 {
                   "$or": [
-                    { "candidate.neargaiabright": { "$gte": 20 } },
-                    { "candidate.neargaiabright": { "$lt": 0 } },
-                    { "candidate.maggaiabright": { "$gte": 12 } },
-                    { "candidate.maggaiabright": { "$lt": 0 } }
+                    {
+                      "candidate.neargaiabright": {
+                        "$gte": 20
+                      }
+                    },
+                    {
+                      "candidate.neargaiabright": {
+                        "$lt": 0
+                      }
+                    },
+                    {
+                      "candidate.maggaiabright": {
+                        "$gte": 12
+                      }
+                    },
+                    {
+                      "candidate.maggaiabright": {
+                        "$lt": 0
+                      }
+                    }
                   ]
                 },
                 {
                   "$or": [
-                    { "coordinates.b": { "$lte": -15 } },
-                    { "coordinates.b": { "$gte": 15 } }
+                    {
+                      "coordinates.b": {
+                        "$lte": -15
+                      }
+                    },
+                    {
+                      "coordinates.b": {
+                        "$gte": 15
+                      }
+                    }
                   ]
                 },
                 {
                   "$or": [
-                    { "candidate.sgscore1": { "$lte": 0.76 } },
-                    { "distpsnr1_switch": { "$gte": 0.25 } },
-                    { "distpsnr1_switch": { "$lt": 0 } }
+                    {
+                      "candidate.sgscore1": {
+                        "$lte": 0.76
+                      }
+                    },
+                    {
+                      "distpsnr1_switch": {
+                        "$gte": 0.25
+                      }
+                    },
+                    {
+                      "distpsnr1_switch": {
+                        "$lt": 0
+                      }
+                    }
                   ]
                 },
                 {
                   "$or": [
-                    { "candidate.ssdistnr": { "$lt": 0 } },
-                    { "candidate.ssdistnr": { "$gte": 12 } },
-                    { "candidate.ssmagnr": { "$lte": 0 } },
-                    { "candidate.ssmagnr": { "$gt": 20 } },
-                    { "candidate.ssmagnr": { "$eq": "null" } }
+                    {
+                      "candidate.ssdistnr": {
+                        "$lt": 0
+                      }
+                    },
+                    {
+                      "candidate.ssdistnr": {
+                        "$gte": 12
+                      }
+                    },
+                    {
+                      "candidate.ssmagnr": {
+                        "$lte": 0
+                      }
+                    },
+                    {
+                      "candidate.ssmagnr": {
+                        "$gt": 20
+                      }
+                    },
+                    {
+                      "candidate.ssmagnr": {
+                        "$eq": "null"
+                      }
+                    }
                   ]
                 }
               ]
@@ -444,58 +945,130 @@
               "$nor": [
                 {
                   "$and": [
-                    { "WiseW1W2_gt1": { "$eq": true } },
+                    {
+                      "WiseW1W2_gt1": {
+                        "$eq": true
+                      }
+                    },
                     {
                       "$and": [
-                        { "prv_cand_90_bin_hist_arr.50": { "$exists": true } },
+                        {
+                          "prv_cand_90_bin_hist_arr.50": {
+                            "$exists": true
+                          }
+                        },
                         {
                           "$or": [
                             {
                               "$and": [
-                                { "dets_jd_90_180.10": { "$exists": true } },
-                                { "dets_jd_180_270.10": { "$exists": true } }
+                                {
+                                  "dets_jd_90_180.10": {
+                                    "$exists": true
+                                  }
+                                },
+                                {
+                                  "dets_jd_180_270.10": {
+                                    "$exists": true
+                                  }
+                                }
                               ]
                             },
                             {
                               "$and": [
-                                { "dets_jd_180_270.10": { "$exists": true } },
-                                { "dets_jd_270_360.10": { "$exists": true } }
+                                {
+                                  "dets_jd_180_270.10": {
+                                    "$exists": true
+                                  }
+                                },
+                                {
+                                  "dets_jd_270_360.10": {
+                                    "$exists": true
+                                  }
+                                }
                               ]
                             },
                             {
                               "$and": [
-                                { "dets_jd_360_450.10": { "$exists": true } },
-                                { "dets_jd_450_540.10": { "$exists": true } }
+                                {
+                                  "dets_jd_360_450.10": {
+                                    "$exists": true
+                                  }
+                                },
+                                {
+                                  "dets_jd_450_540.10": {
+                                    "$exists": true
+                                  }
+                                }
                               ]
                             },
                             {
                               "$and": [
-                                { "dets_jd_540_630.10": { "$exists": true } },
-                                { "dets_jd_630_720.10": { "$exists": true } }
+                                {
+                                  "dets_jd_540_630.10": {
+                                    "$exists": true
+                                  }
+                                },
+                                {
+                                  "dets_jd_630_720.10": {
+                                    "$exists": true
+                                  }
+                                }
                               ]
                             },
                             {
                               "$and": [
-                                { "dets_jd_720_810.10": { "$exists": true } },
-                                { "dets_jd_810_900.10": { "$exists": true } }
+                                {
+                                  "dets_jd_720_810.10": {
+                                    "$exists": true
+                                  }
+                                },
+                                {
+                                  "dets_jd_810_900.10": {
+                                    "$exists": true
+                                  }
+                                }
                               ]
                             },
                             {
                               "$and": [
-                                { "dets_jd_450_540.10": { "$exists": true } },
-                                { "dets_jd_540_630.10": { "$exists": true } }
+                                {
+                                  "dets_jd_450_540.10": {
+                                    "$exists": true
+                                  }
+                                },
+                                {
+                                  "dets_jd_540_630.10": {
+                                    "$exists": true
+                                  }
+                                }
                               ]
                             },
                             {
                               "$and": [
-                                { "dets_jd_270_360.10": { "$exists": true } },
-                                { "dets_jd_360_450.10": { "$exists": true } }
+                                {
+                                  "dets_jd_270_360.10": {
+                                    "$exists": true
+                                  }
+                                },
+                                {
+                                  "dets_jd_360_450.10": {
+                                    "$exists": true
+                                  }
+                                }
                               ]
                             },
                             {
                               "$and": [
-                                { "dets_jd_630_720.10": { "$exists": true } },
-                                { "dets_jd_720_810.10": { "$exists": true } }
+                                {
+                                  "dets_jd_630_720.10": {
+                                    "$exists": true
+                                  }
+                                },
+                                {
+                                  "dets_jd_720_810.10": {
+                                    "$exists": true
+                                  }
+                                }
                               ]
                             }
                           ]
@@ -510,7 +1083,11 @@
         },
         {
           "$and": [
-            { "prv_nd_gt90dago.199": { "$exists": false } },
+            {
+              "prv_nd_gt90dago.199": {
+                "$exists": false
+              }
+            },
             {
               "$expr": {
                 "$lte": [
@@ -532,15 +1109,39 @@
         },
         {
           "$and": [
-            { "n_det_g": { "$gte": 1 } },
-            { "n_det_r": { "$gte": 1 } },
             {
-              "$expr": {
-                "$gte": [{ "$add": ["$n_det_g", "$n_det_r"] }, 3]
+              "n_det_g": {
+                "$gte": 1
               }
             },
-            { "age_days": { "$lt": 180 } },
-            { "n_unique_nights": { "$gte": 2 } }
+            {
+              "n_det_r": {
+                "$gte": 1
+              }
+            },
+            {
+              "$expr": {
+                "$gte": [
+                  {
+                    "$add": [
+                      "$n_det_g",
+                      "$n_det_r"
+                    ]
+                  },
+                  3
+                ]
+              }
+            },
+            {
+              "age_days": {
+                "$lt": 180
+              }
+            },
+            {
+              "n_unique_nights": {
+                "$gte": 2
+              }
+            }
           ]
         }
       ]
