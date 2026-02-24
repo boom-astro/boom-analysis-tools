@@ -16,23 +16,6 @@
     }
   },
   {
-    "$lookup": {
-      "from": "ZTF_alerts_aux",
-      "localField": "objectId",
-      "foreignField": "_id",
-      "as": "_aux"
-    }
-  },
-  {
-    "$addFields": {
-      "prv_candidates": { "$arrayElemAt": ["$_aux.prv_candidates", 0] },
-      "cross_matches": { "$arrayElemAt": ["$_aux.cross_matches", 0] }
-    }
-  },
-  {
-    "$project": { "_aux": 0 }
-  },
-  {
     "$project": {
       "objectId": 1,
       "candidate.jd": 1,
