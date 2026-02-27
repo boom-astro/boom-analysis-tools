@@ -38,7 +38,7 @@ else:
     config["security.protocol"] = "PLAINTEXT"
 consumer = Consumer(config)
 
-topic = os.getenv("BOOM_KAFKA_TOPIC")
+topic = "ZTF_alerts_results"
 consumer.subscribe([topic])
 print(f"Subscribed to topic: {topic}")
 
