@@ -5,6 +5,7 @@ import json
 from dotenv import load_dotenv
 from utils.avro import read_avro
 from confluent_kafka import Consumer
+from utils.logger import log
 
 load_dotenv()
 
@@ -40,25 +41,26 @@ consumer = Consumer(config)
 
 topic = "ZTF_alerts_results"
 consumer.subscribe([topic])
-print(f"Subscribed to topic: {topic}")
+log(f"Subscribed to topic: {topic}")
 
 
 def consume():
-    print("Listening for messages...")
+    log("Listening for messages...")
     alerts = []
     count = 0
     try:
         while True:
             msg = consumer.poll(timeout=10.0)
             if msg is None:
-                print(f"No {'more ' if alerts else ''}messages available, exiting")
-                break
+                log(f"Processed {count} messages")
+                log(f"No {'more ' if alerts else ''}messages available")
+                continue
             if msg.error():
-                print(f"Consumer error: {msg.error()}")
+                log(f"Consumer error: {msg.error()}")
                 continue
 
-            if count % 1000 == 0:
-                print(f"Processed {count} messages")
+            if count and count % 1000 == 0:
+                log(f"Processed {count} messages")
             count += 1
 
             record = read_avro(msg)
@@ -77,7 +79,7 @@ def consume():
     except KeyboardInterrupt:
         pass
     finally:
-        print(f"Processed {count} messages")
+        log(f"Processed {count} messages")
         consumer.close()
 
 if __name__ == "__main__":
