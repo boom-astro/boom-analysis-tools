@@ -46,21 +46,35 @@ if __name__ == "__main__":
         type=float,
         metavar="JD",
         default=None,
-        help="Reprocess alerts created after the given Julian Date (default: all alerts)."
+        help="Reprocess alerts created after the given Julian Date."
+    )
+    parser.add_argument(
+        "--created-before",
+        type=float,
+        metavar="JD",
+        default=None,
+        help="Reprocess alerts between created-after and created-before."
     )
     parser.add_argument(
         "--observed-after",
         type=float,
         metavar="JD",
         default=None,
-        help="Reprocess alerts observed after the given Julian Date (default: all alerts)."
+        help="Reprocess alerts observed after the given Julian Date."
+    )
+    parser.add_argument(
+        "--observed-before",
+        type=float,
+        metavar="JD",
+        default=None,
+        help="Reprocess alerts between observed-after and observed-before."
     )
     parser.add_argument(
         "--reprocess-type",
         type=str,
         choices=["enrichment+filter", "filter"],
         default="enrichment+filter",
-        help="The type of reprocessing to perform (default: filter)."
+        help="The type of reprocessing to perform (default: enrichment+filter)."
     )
     parser.add_argument(
         "--batch-size",
@@ -89,7 +103,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     survey = args.survey
     created_after = args.created_after
+    created_before = args.created_before
     observed_after = args.observed_after
+    observed_before = args.observed_before
     reprocess_type = args.reprocess_type
     batch_size = args.batch_size
     mongo_uri = args.mongo_uri
@@ -99,14 +115,28 @@ if __name__ == "__main__":
     alerts_collection = fetch_mongo(f"{survey}_alerts", url=mongo_uri)
     # Build query filter based on period
     query_filter = {}
+    if created_before and not created_after:
+        log(f"{YELLOW}Warning: created-before can be set only if created-after is also set.{ENDC}")
+        exit(1)
+    if observed_before and not observed_after:
+        log(f"{YELLOW}Warning: observed-before can be set only if observed-after is also set.{ENDC}")
+        exit(1)
     if created_after or observed_after:
         if created_after:
             query_filter["created_at"] = {"$gte": created_after}
-            log(f"Filtering alerts created after JD {created_after} ({Time(created_after, format='jd').iso[:19]})")
+            if created_before:
+                query_filter["created_at"]["$lte"] = created_before
+                log(f"Filtering alerts created between JD {created_after} ({Time(created_after, format='jd').iso[:19]}) and JD {created_before} ({Time(created_before, format='jd').iso[:19]})")
+            else:
+                log(f"Filtering alerts created after JD {created_after} ({Time(created_after, format='jd').iso[:19]})")
 
         if observed_after:
             query_filter["candidate.jd"] = {"$gte": observed_after}
-            log(f"Filtering alerts observed after JD {observed_after} ({Time(observed_after, format='jd').iso[:19]})")
+            if observed_before:
+                query_filter["candidate.jd"]["$lte"] = observed_before
+                log(f"Filtering alerts observed between JD {observed_after} ({Time(observed_after, format='jd').iso[:19]}) and JD {observed_before} ({Time(observed_before, format='jd').iso[:19]})")
+            else:
+                log(f"Filtering alerts observed after JD {observed_after} ({Time(observed_after, format='jd').iso[:19]})")
             nb_alerts = alerts_collection.count_documents(query_filter)
         else:
             try:
@@ -149,5 +179,9 @@ if __name__ == "__main__":
             redis_client.lpush(redis_queue, *batch)
             log(f"{count}/{nb_alerts} alerts processed.")
             batch = []
+
+    if batch:
+        redis_client.lpush(redis_queue, *batch)
+        log(f"{count}/{nb_alerts} alerts processed.")
 
     log(f"Finished reprocessing {nb_alerts} alerts.")
