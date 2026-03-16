@@ -42,6 +42,12 @@ if __name__ == "__main__":
         help="The survey name (default: ZTF)."
     )
     parser.add_argument(
+        "--candid",
+        type=int,
+        default=None,
+        help="Reprocess a single alert by its candid."
+    )
+    parser.add_argument(
         "--created-after",
         type=float,
         metavar="JD",
@@ -113,6 +119,24 @@ if __name__ == "__main__":
     redis_port = args.redis_port
 
     alerts_collection = fetch_mongo(f"{survey}_alerts", url=mongo_uri)
+    redis_client = redis.Redis(host=redis_host, port=redis_port, db=0)
+    redis_queue = get_redis_queue(survey, reprocess_type)
+
+    # --- Single alert reprocessing by candid ---
+    if args.candid:
+        alert = alerts_collection.find_one({"candidate.candid": args.candid})
+        if not alert:
+            log(f"{YELLOW}No alert found with candid {args.candid}.{ENDC}")
+            exit(1)
+        if reprocess_type == "filter" and survey == "ZTF":
+            value = f"{alert['candidate']['programid']},{alert['_id']}"
+        else:
+            value = alert["_id"]
+        redis_client.lpush(redis_queue, value)
+        log(f"Pushed alert {alert['_id']} (candid {args.candid}) to {redis_queue}.")
+        exit(0)
+
+    # --- Bulk reprocessing ---
     # Build query filter based on period
     query_filter = {}
     if created_before and not created_after:
@@ -164,8 +188,6 @@ if __name__ == "__main__":
 
     batch = []
     count = 0
-    redis_client = redis.Redis(host=redis_host, port=redis_port, db=0)
-    redis_queue = get_redis_queue(survey, reprocess_type)
     for alert in alerts_collection.find(query_filter):
         # For ZTF filter reprocessing, we need both programid and alert id
         if reprocess_type == "filter" and survey == "ZTF":
