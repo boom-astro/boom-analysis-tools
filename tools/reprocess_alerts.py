@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     # --- Single alert reprocessing by candid ---
     if args.candid:
-        alert = alerts_collection.find_one({"candidate.candid": args.candid})
+        alert = alerts_collection.find_one({"_id": args.candid})
         if not alert:
             log(f"{YELLOW}No alert found with candid {args.candid}.{ENDC}")
             exit(1)
