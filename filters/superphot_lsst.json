@@ -14,12 +14,7 @@
         },
         {
           "candidate.ndethist": {
-            "$gte": 5
-          }
-        },
-        {
-          "candidate.ndethist": {
-            "$lt": 200
+            "$gte": 2
           }
         },
         {
@@ -334,6 +329,73 @@
                     "$$this.isdiffpos",
                     true
                   ]
+                },
+                {
+                  "$gt": [
+                    "$$this.magpsf",
+                    0
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "n_det_i": {
+        "$size": {
+          "$filter": {
+            "input": {
+              "$ifNull": [
+                "$prv_candidates",
+                []
+              ]
+            },
+            "cond": {
+              "$and": [
+                {
+                  "$eq": [
+                    "$$this.band",
+                    "i"
+                  ]
+                },
+                {
+                  "$eq": [
+                    "$$this.isdiffpos",
+                    true
+                  ]
+                },
+                {
+                  "$gt": [
+                    "$$this.magpsf",
+                    0
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "n_det_z": {
+        "$size": {
+          "$filter": {
+            "input": {
+              "$ifNull": [
+                "$prv_candidates",
+                []
+              ]
+            },
+            "cond": {
+              "$and": [
+                {
+                  "$eq": [
+                    "$$this.band",
+                    "z"
+                  ]
+                },
+                {
+                  "$eq": [
+                    "$$this.isdiffpos",
+                    true                  ]
                 },
                 {
                   "$gt": [
@@ -1191,25 +1253,17 @@
         {
           "$and": [
             {
-              "n_det_g": {
-                "$gte": 1
-              }
-            },
-            {
-              "n_det_r": {
-                "$gte": 1
-              }
-            },
-            {
               "$expr": {
                 "$gte": [
                   {
                     "$add": [
                       "$n_det_g",
-                      "$n_det_r"
+                      "$n_det_r",
+                      "$n_det_i",
+                      "$n_det_z"
                     ]
                   },
-                  3
+                  2
                 ]
               }
             },
@@ -1292,6 +1346,8 @@
       "parallax": 1,
       "n_det_g": 1,
       "n_det_r": 1,
+      "n_det_i": 1,
+      "n_det_z": 1,
       "age_days": 1,
       "n_unique_nights": 1
     }
