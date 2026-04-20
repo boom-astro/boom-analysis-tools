@@ -75,8 +75,8 @@ def consume():
                     json.dump(record, f, indent=2)
 
             # Extract filter name for counting
-            for filter in record.get("filters", []):
-                count_by_filter[filter["filter_name"]] = count_by_filter.get(filter["filter_name"], 0) + 1
+            for boom_filter in record.get("filters", []):
+                count_by_filter[boom_filter["filter_name"]] = count_by_filter.get(boom_filter["filter_name"], 0) + 1
 
     except KeyboardInterrupt:
         pass
