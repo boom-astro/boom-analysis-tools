@@ -48,6 +48,7 @@ def consume():
     log("Listening for messages...")
     alerts = []
     count = 0
+    count_by_filter = {}
     try:
         while True:
             msg = consumer.poll(timeout=10.0)
@@ -76,9 +77,14 @@ def consume():
 
             alerts.append(record)
 
+            # Extract filter name for counting
+            for filter in record.get("filters", []):
+                count_by_filter[filter["filter_name"]] = count_by_filter.get(filter["filter_name"], 0) + 1
+
     except KeyboardInterrupt:
         pass
     finally:
+        log(count_by_filter)
         log(f"Processed {count} messages")
         consumer.close()
 
