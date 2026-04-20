@@ -46,7 +46,6 @@ log(f"Subscribed to topic: {topic}")
 
 def consume():
     log("Listening for messages...")
-    alerts = []
     count = 0
     count_by_filter = {}
     try:
@@ -54,7 +53,7 @@ def consume():
             msg = consumer.poll(timeout=10.0)
             if msg is None:
                 log(f"Processed {count} messages")
-                log(f"No {'more ' if alerts else ''}messages available")
+                log(f"No {'more ' if count_by_filter else ''}messages available")
                 continue
             if msg.error():
                 log(f"Consumer error: {msg.error()}")
@@ -74,8 +73,6 @@ def consume():
             if count == 1:
                 with open("first_alert.json", "w") as f:
                     json.dump(record, f, indent=2)
-
-            alerts.append(record)
 
             # Extract filter name for counting
             for filter in record.get("filters", []):
