@@ -1,7 +1,6 @@
 [
   {
     "$project": {
-      "_id": 0,
       "candid": 1,
       "objectId": 1,
       "prv_candidates.jd": 1,
