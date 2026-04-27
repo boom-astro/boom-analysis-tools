@@ -1,14 +1,7 @@
 [
   {
     "$match": {
-      "candidate.isdiffpos": {
-        "$in": [
-          1,
-          "1",
-          "t",
-          true
-        ]
-      },
+      "candidate.isdiffpos": true,
       "candidate.rb": {
         "$gt": 0.2
       },
@@ -296,17 +289,7 @@
                     0.75
                   ]
                 },
-                {
-                  "$in": [
-                    "$$cand.isdiffpos",
-                    [
-                      1,
-                      "1",
-                      "t",
-                      true
-                    ]
-                  ]
-                },
+                "$$cand.isdiffpos",
                 {
                   "$gt": [
                     "$$cand.magpsf",
@@ -330,14 +313,8 @@
             "input": "$prv_candidates",
             "as": "cand",
             "cond": {
-              "$in": [
-                "$$cand.isdiffpos",
-                [
-                  0,
-                  "0",
-                  "f",
-                  false
-                ]
+              "$not": [
+                "$$cand.isdiffpos"
               ]
             }
           }
@@ -423,17 +400,7 @@
                         0.75
                       ]
                     },
-                    {
-                      "$in": [
-                        "$$cand.isdiffpos",
-                        [
-                          1,
-                          "1",
-                          "t",
-                          true
-                        ]
-                      ]
-                    },
+                    "$$cand.isdiffpos",
                     {
                       "$gt": [
                         "$$cand.magpsf",
@@ -1330,17 +1297,7 @@
                     99
                   ]
                 },
-                {
-                  "$in": [
-                    "$$cand.isdiffpos",
-                    [
-                      1,
-                      "1",
-                      true,
-                      "t"
-                    ]
-                  ]
-                }
+                "$$cand.isdiffpos"
               ]
             }
           }
