@@ -1,5 +1,66 @@
 [
   {
+    "$match": {
+      "candidate.isdiffpos": {
+        "$in": [
+          1,
+          "1",
+          "t",
+          true
+        ]
+      },
+      "candidate.rb": {
+        "$gt": 0.2
+      },
+      "candidate.drb": {
+        "$gte": 0.8
+      },
+      "candidate.ndethist": {
+        "$lte": 200
+      },
+      "$expr": {
+        "$and": [
+          {
+            "$gte": [
+              {
+                "$abs": "$coordinates.b"
+              },
+              7
+            ]
+          },
+          {
+            "$not": [
+              {
+                "$and": [
+                  {
+                    "$gte": [
+                      "$candidate.ssdistnr",
+                      0
+                    ]
+                  },
+                  {
+                    "$lt": [
+                      "$candidate.ssdistnr",
+                      12
+                    ]
+                  },
+                  {
+                    "$lt": [
+                      {
+                        "$abs": "$candidate.ssmagnr"
+                      },
+                      20
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
     "$project": {
       "candid": 1,
       "objectId": 1,
@@ -76,15 +137,12 @@
       "nbad": "$candidate.nbad",
       "chipsf": "$candidate.chipsf",
       "gal_lat": "$coordinates.b",
-      "ssdistnr": "$candidate.ssdistnr",
-      "ssmagnr": "$candidate.ssmagnr",
       "ssnamenr": "$candidate.ssnamenr",
       "t_start": "$candidate.jdstarthist",
       "neargaia": "$candidate.neargaia",
       "maggaia": "$candidate.maggaia",
       "neargaiabright": "$candidate.neargaiabright",
       "maggaiabright": "$candidate.maggaiabright",
-      "isdiffpos": "$candidate.isdiffpos",
       "drb": "$candidate.drb",
       "age": {
         "$subtract": [
@@ -329,7 +387,6 @@
       "srmag1": 1,
       "distpsnr1": 1,
       "gal_lat": 1,
-      "ssdistnr": 1,
       "ssnamenr": 1,
       "maggaia": 1,
       "neargaia": 1,
@@ -368,7 +425,7 @@
                     },
                     {
                       "$in": [
-                        "$isdiffpos",
+                        "$$cand.isdiffpos",
                         [
                           1,
                           "1",
@@ -394,25 +451,6 @@
               }
             }
           }
-        ]
-      },
-      "latitude": {
-        "$gte": [
-          {
-            "$abs": "$gal_lat"
-          },
-          7
-        ]
-      },
-      "positivesubtraction": {
-        "$in": [
-          "$isdiffpos",
-          [
-            1,
-            "1",
-            "t",
-            true
-          ]
         ]
       },
       "real": {
@@ -1266,30 +1304,6 @@
           }
         ]
       },
-      "rock": {
-        "$and": [
-          {
-            "$gte": [
-              "$ssdistnr",
-              0
-            ]
-          },
-          {
-            "$lt": [
-              "$ssdistnr",
-              12
-            ]
-          },
-          {
-            "$lt": [
-              {
-                "$abs": "$ssmagnr"
-              },
-              20
-            ]
-          }
-        ]
-      },
       "stationary": {
         "$anyElementTrue": {
           "$map": {
@@ -1336,15 +1350,12 @@
   },
   {
     "$match": {
-      "latitude": true,
       "bright": true,
       "pointunderneath": false,
-      "positivesubtraction": true,
       "real": true,
       "stationary": true,
       "brightstar": false,
-      "variablesource": false,
-      "rock": false
+      "variablesource": false
     }
   },
   {
