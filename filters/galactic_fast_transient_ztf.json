@@ -27,12 +27,12 @@
           "$and": [
             {
               "coordinates.b": {
-                "$lt": 20
+                "$lt": 15
               }
             },
             {
               "coordinates.b": {
-                "$gt": -20
+                "$gt": -15
               }
             }
           ]

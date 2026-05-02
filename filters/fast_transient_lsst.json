@@ -15,12 +15,12 @@
           "$or": [
             {
               "coordinates.b": {
-                "$gte": 20
+                "$gte": 15
               }
             },
             {
               "coordinates.b": {
-                "$lte": -20
+                "$lte": -15
               }
             }
           ]
