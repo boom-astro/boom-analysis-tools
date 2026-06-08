@@ -1,6 +1,7 @@
 import os
 import time
 import json
+from datetime import datetime, timezone
 
 from dotenv import load_dotenv
 from utils.avro import read_avro
@@ -46,21 +47,27 @@ log(f"Subscribed to topic: {topic}")
 
 def consume():
     log("Listening for messages...")
+    last_kafka_date = None
     count = 0
     count_by_filter = {}
     try:
         while True:
             msg = consumer.poll(timeout=10.0)
             if msg is None:
-                log(f"Processed {count} messages")
+                log(f"Processed {count} messages.{f' Last message timestamp: {last_kafka_date.isoformat()}' if last_kafka_date else ''}")
                 log(f"No {'more ' if count_by_filter else ''}messages available")
-                continue
+                break
             if msg.error():
                 log(f"Consumer error: {msg.error()}")
                 continue
 
+            _, ts_ms = msg.timestamp()
+            kafka_date = datetime.fromtimestamp(ts_ms // 1000, tz=timezone.utc)
+            if last_kafka_date is None or kafka_date > last_kafka_date:
+                last_kafka_date = kafka_date
+
             if count and count % 1000 == 0:
-                log(f"Processed {count} messages")
+                log(f"Processed {count} messages. Message timestamp: {kafka_date.isoformat()}")
             count += 1
 
             record = read_avro(msg)
@@ -82,7 +89,6 @@ def consume():
         pass
     finally:
         log(count_by_filter)
-        log(f"Processed {count} messages")
         consumer.close()
 
 if __name__ == "__main__":
