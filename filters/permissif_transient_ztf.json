@@ -1,0 +1,160 @@
+[
+  {
+    "$match": {
+      "candidate.drb": {
+        "$gte": 0.8
+      },
+      "candidate.nbad": {
+        "$lt": 5
+      },
+      "candidate.fwhm": {
+        "$gt": 0.5,
+        "$lt": 8
+      },
+      "candidate.isdiffpos": true,
+      "properties.rock": false,
+      "properties.star": false,
+      "properties.near_brightstar": false,
+      "properties.stationary": true,
+      "$and": [
+        {
+          "$or": [
+            {
+              "coordinates.b": {
+                "$gte": 10
+              }
+            },
+            {
+              "coordinates.b": {
+                "$lte": -10
+              }
+            }
+          ]
+        },
+        {
+          "$expr": {
+            "$lte": [
+              {
+                "$subtract": [
+                  "$candidate.jd",
+                  "$candidate.jdstarthist"
+                ]
+              },
+              10.0
+            ]
+          }
+        },
+        {
+          "$expr": {
+            "$lt": [
+              {
+                "$abs": {
+                  "$subtract": [
+                    "$candidate.magpsf",
+                    "$candidate.magap"
+                  ]
+                }
+              },
+              0.75
+            ]
+          }
+        },
+        {
+          "$expr": {
+            "$gt": [
+              "$candidate.ncovhist",
+              "$candidate.ndethist"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "$project": {
+      "objectId": 1,
+      "t_now": "$candidate.jd",
+      "m_now": "$candidate.magpsf",
+      "age": {
+        "$subtract": [
+          "$candidate.jd",
+          "$candidate.jdstarthist"
+        ]
+      },
+      "photstats": "$properties.photstats",
+      "gaia_star": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.Gaia_DR3",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$lte": [
+                    "$$this.distance_arcsec",
+                    1.5
+                  ]
+                },
+                {
+                  "$gt": [
+                    {
+                      "$abs": {
+                        "$ifNull": [
+                          "$$this.parallax_over_error",
+                          0
+                        ]
+                      }
+                    },
+                    5
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "quasar": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.milliquas_v8",
+                []
+              ]
+            },
+            "in": {
+              "$lte": [
+                "$$this.distance_arcsec",
+                1.5
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "$match": {
+      "gaia_star": false,
+      "quasar": false
+    }
+  },
+  {
+    "$project": {
+      "objectId": 1,
+      "annotations.passed_at": "$t_now",
+      "annotations.current_magpsf": "$m_now",
+      "annotations.age": {
+        "$round": [
+          "$age",
+          2
+        ]
+      },
+      "annotations.photstats": "$photstats"
+    }
+  }
+]
