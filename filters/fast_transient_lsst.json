@@ -2,14 +2,27 @@
   {
     "$match": {
       "candidate.reliability": {
-        "$gte": 0.5
+        "$gte": 0.8
+      },
+      "candidate.snr_psf": {
+        "$gte": 5
       },
       "candidate.magpsf": {
         "$lt": 99
       },
       "candidate.isdiffpos": true,
+      "candidate.isDipole": false,
+      "candidate.psfFlux_flag": false,
+      "candidate.pixelFlags_streak": false,
+      "candidate.glint_trail": false,
       "properties.rock": false,
       "properties.stationary": true,
+      "properties.star": {
+        "$ne": true
+      },
+      "properties.near_brightstar": {
+        "$ne": true
+      },
       "$and": [
         {
           "$or": [
@@ -30,13 +43,29 @@
             {
               "$and": [
                 {
-                  "properties.photstats.z.fading.rate": {
-                    "$gte": 0.3
+                  "properties.multisurvey_photstats.u.fading.rate": {
+                    "$gte": 0.3,
+                    "$lte": 5
                   }
                 },
                 {
-                  "properties.photstats.z.fading.red_chi2": {
-                    "$lte": 2.0
+                  "properties.multisurvey_photstats.u.fading.red_chi2": {
+                    "$not": {
+                      "$gt": 10
+                    }
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.multisurvey_photstats.u.fading.rate",
+                          "$properties.multisurvey_photstats.u.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
                   }
                 }
               ]
@@ -44,13 +73,149 @@
             {
               "$and": [
                 {
-                  "properties.photstats.g.fading.rate": {
-                    "$gte": 0.3
+                  "properties.multisurvey_photstats.g.fading.rate": {
+                    "$gte": 0.3,
+                    "$lte": 5
                   }
                 },
                 {
-                  "properties.photstats.g.fading.red_chi2": {
-                    "$lte": 2.0
+                  "properties.multisurvey_photstats.g.fading.red_chi2": {
+                    "$not": {
+                      "$gt": 10
+                    }
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.multisurvey_photstats.g.fading.rate",
+                          "$properties.multisurvey_photstats.g.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "properties.multisurvey_photstats.r.fading.rate": {
+                    "$gte": 0.3,
+                    "$lte": 5
+                  }
+                },
+                {
+                  "properties.multisurvey_photstats.r.fading.red_chi2": {
+                    "$not": {
+                      "$gt": 10
+                    }
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.multisurvey_photstats.r.fading.rate",
+                          "$properties.multisurvey_photstats.r.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "properties.multisurvey_photstats.i.fading.rate": {
+                    "$gte": 0.3,
+                    "$lte": 5
+                  }
+                },
+                {
+                  "properties.multisurvey_photstats.i.fading.red_chi2": {
+                    "$not": {
+                      "$gt": 10
+                    }
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.multisurvey_photstats.i.fading.rate",
+                          "$properties.multisurvey_photstats.i.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "properties.multisurvey_photstats.z.fading.rate": {
+                    "$gte": 0.3,
+                    "$lte": 5
+                  }
+                },
+                {
+                  "properties.multisurvey_photstats.z.fading.red_chi2": {
+                    "$not": {
+                      "$gt": 10
+                    }
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.multisurvey_photstats.z.fading.rate",
+                          "$properties.multisurvey_photstats.z.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "properties.multisurvey_photstats.y.fading.rate": {
+                    "$gte": 0.3,
+                    "$lte": 5
+                  }
+                },
+                {
+                  "properties.multisurvey_photstats.y.fading.red_chi2": {
+                    "$not": {
+                      "$gt": 10
+                    }
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.multisurvey_photstats.y.fading.rate",
+                          "$properties.multisurvey_photstats.y.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
                   }
                 }
               ]
@@ -80,7 +245,82 @@
       "objectId": 1,
       "t_now": "$candidate.jd",
       "m_now": "$candidate.magpsf",
-      "photstats": "$properties.photstats"
+      "photstats": "$properties.multisurvey_photstats",
+      "age": {
+        "$subtract": [
+          "$candidate.jd",
+          {
+            "$ifNull": [
+              {
+                "$min": "$prv_candidates.jd"
+              },
+              "$candidate.jd"
+            ]
+          }
+        ]
+      },
+      "gaia_star": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.Gaia_DR3",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$lte": [
+                    "$$this.distance_arcsec",
+                    1.0
+                  ]
+                },
+                {
+                  "$gt": [
+                    {
+                      "$abs": {
+                        "$ifNull": [
+                          "$$this.parallax_over_error",
+                          0
+                        ]
+                      }
+                    },
+                    5
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "quasar": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.milliquas_v8",
+                []
+              ]
+            },
+            "in": {
+              "$lte": [
+                "$$this.distance_arcsec",
+                1.5
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "$match": {
+      "gaia_star": false,
+      "quasar": false,
+      "age": {
+        "$lte": 7.0
+      }
     }
   },
   {
