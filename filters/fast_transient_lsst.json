@@ -56,15 +56,20 @@
                   }
                 },
                 {
+                  "properties.multisurvey_photstats.u.fading.rate_error": {
+                    "$gte": 0
+                  }
+                },
+                {
                   "$expr": {
                     "$gt": [
+                      "$properties.multisurvey_photstats.u.fading.rate",
                       {
-                        "$divide": [
-                          "$properties.multisurvey_photstats.u.fading.rate",
+                        "$multiply": [
+                          3,
                           "$properties.multisurvey_photstats.u.fading.rate_error"
                         ]
-                      },
-                      3
+                      }
                     ]
                   }
                 }
@@ -86,15 +91,20 @@
                   }
                 },
                 {
+                  "properties.multisurvey_photstats.g.fading.rate_error": {
+                    "$gte": 0
+                  }
+                },
+                {
                   "$expr": {
                     "$gt": [
+                      "$properties.multisurvey_photstats.g.fading.rate",
                       {
-                        "$divide": [
-                          "$properties.multisurvey_photstats.g.fading.rate",
+                        "$multiply": [
+                          3,
                           "$properties.multisurvey_photstats.g.fading.rate_error"
                         ]
-                      },
-                      3
+                      }
                     ]
                   }
                 }
@@ -116,15 +126,20 @@
                   }
                 },
                 {
+                  "properties.multisurvey_photstats.r.fading.rate_error": {
+                    "$gte": 0
+                  }
+                },
+                {
                   "$expr": {
                     "$gt": [
+                      "$properties.multisurvey_photstats.r.fading.rate",
                       {
-                        "$divide": [
-                          "$properties.multisurvey_photstats.r.fading.rate",
+                        "$multiply": [
+                          3,
                           "$properties.multisurvey_photstats.r.fading.rate_error"
                         ]
-                      },
-                      3
+                      }
                     ]
                   }
                 }
@@ -146,15 +161,20 @@
                   }
                 },
                 {
+                  "properties.multisurvey_photstats.i.fading.rate_error": {
+                    "$gte": 0
+                  }
+                },
+                {
                   "$expr": {
                     "$gt": [
+                      "$properties.multisurvey_photstats.i.fading.rate",
                       {
-                        "$divide": [
-                          "$properties.multisurvey_photstats.i.fading.rate",
+                        "$multiply": [
+                          3,
                           "$properties.multisurvey_photstats.i.fading.rate_error"
                         ]
-                      },
-                      3
+                      }
                     ]
                   }
                 }
@@ -176,15 +196,20 @@
                   }
                 },
                 {
+                  "properties.multisurvey_photstats.z.fading.rate_error": {
+                    "$gte": 0
+                  }
+                },
+                {
                   "$expr": {
                     "$gt": [
+                      "$properties.multisurvey_photstats.z.fading.rate",
                       {
-                        "$divide": [
-                          "$properties.multisurvey_photstats.z.fading.rate",
+                        "$multiply": [
+                          3,
                           "$properties.multisurvey_photstats.z.fading.rate_error"
                         ]
-                      },
-                      3
+                      }
                     ]
                   }
                 }
@@ -206,15 +231,20 @@
                   }
                 },
                 {
+                  "properties.multisurvey_photstats.y.fading.rate_error": {
+                    "$gte": 0
+                  }
+                },
+                {
                   "$expr": {
                     "$gt": [
+                      "$properties.multisurvey_photstats.y.fading.rate",
                       {
-                        "$divide": [
-                          "$properties.multisurvey_photstats.y.fading.rate",
+                        "$multiply": [
+                          3,
                           "$properties.multisurvey_photstats.y.fading.rate_error"
                         ]
-                      },
-                      3
+                      }
                     ]
                   }
                 }
