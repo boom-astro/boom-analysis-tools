@@ -41,14 +41,92 @@
           "$or": [
             {
               "$and": [
-                {"properties.photstats.r.fading.rate": {"$gte": 0.2}},
-                {"$expr": {"$gt": [{"$divide": ["$properties.photstats.r.fading.rate", "$properties.photstats.r.fading.rate_error"]}, 3]}}
+                {
+                  "properties.photstats.g.fading.rate": {
+                    "$gte": 0.2,
+                    "$lte": 5
+                  }
+                },
+                {
+                  "properties.photstats.g.fading.red_chi2": {
+                    "$not": {
+                      "$gt": 10
+                    }
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.photstats.g.fading.rate",
+                          "$properties.photstats.g.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
+                  }
+                }
               ]
             },
             {
               "$and": [
-                {"properties.photstats.g.fading.rate": {"$gte": 0.2}},
-                {"$expr": {"$gt": [{"$divide": ["$properties.photstats.g.fading.rate", "$properties.photstats.g.fading.rate_error"]}, 3]}}
+                {
+                  "properties.photstats.r.fading.rate": {
+                    "$gte": 0.2,
+                    "$lte": 5
+                  }
+                },
+                {
+                  "properties.photstats.r.fading.red_chi2": {
+                    "$not": {
+                      "$gt": 10
+                    }
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.photstats.r.fading.rate",
+                          "$properties.photstats.r.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "properties.photstats.i.fading.rate": {
+                    "$gte": 0.2,
+                    "$lte": 5
+                  }
+                },
+                {
+                  "properties.photstats.i.fading.red_chi2": {
+                    "$not": {
+                      "$gt": 10
+                    }
+                  }
+                },
+                {
+                  "$expr": {
+                    "$gt": [
+                      {
+                        "$divide": [
+                          "$properties.photstats.i.fading.rate",
+                          "$properties.photstats.i.fading.rate_error"
+                        ]
+                      },
+                      3
+                    ]
+                  }
+                }
               ]
             }
           ]
@@ -114,7 +192,66 @@
       "objectId": 1,
       "t_now": "$candidate.jd",
       "m_now": "$candidate.magpsf",
-      "photstats": "$properties.photstats"
+      "photstats": "$properties.photstats",
+      "gaia_star": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.Gaia_DR3",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$lte": [
+                    "$$this.distance_arcsec",
+                    1.5
+                  ]
+                },
+                {
+                  "$gt": [
+                    {
+                      "$abs": {
+                        "$ifNull": [
+                          "$$this.parallax_over_error",
+                          0
+                        ]
+                      }
+                    },
+                    5
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "quasar": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.milliquas_v8",
+                []
+              ]
+            },
+            "in": {
+              "$lte": [
+                "$$this.distance_arcsec",
+                1.5
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "$match": {
+      "gaia_star": false,
+      "quasar": false
     }
   },
   {
