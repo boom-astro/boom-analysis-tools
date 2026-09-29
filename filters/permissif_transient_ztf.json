@@ -81,7 +81,7 @@
           "$candidate.jdstarthist"
         ]
       },
-      "photstats": "$properties.photstats",
+      "photstats": "$properties.multisurvey_photstats",
       "gaia_star": {
         "$anyElementTrue": {
           "$map": {
