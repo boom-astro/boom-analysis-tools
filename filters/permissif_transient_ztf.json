@@ -37,7 +37,17 @@
               {
                 "$subtract": [
                   "$candidate.jd",
-                  "$candidate.jdstarthist"
+                  {
+                    "$min": [
+                      "$candidate.jdstarthist",
+                      {
+                        "$ifNull": [
+                          "$properties.detection_history.first_activity_jd",
+                          "$candidate.jdstarthist"
+                        ]
+                      }
+                    ]
+                  }
                 ]
               },
               10.0
@@ -78,7 +88,17 @@
       "age": {
         "$subtract": [
           "$candidate.jd",
-          "$candidate.jdstarthist"
+          {
+            "$min": [
+              "$candidate.jdstarthist",
+              {
+                "$ifNull": [
+                  "$properties.detection_history.first_activity_jd",
+                  "$candidate.jdstarthist"
+                ]
+              }
+            ]
+          }
         ]
       },
       "photstats": "$properties.multisurvey_photstats",
