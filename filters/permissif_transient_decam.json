@@ -10,7 +10,6 @@
       "candidate.forcediffimflux": {
         "$gt": 0
       },
-      "properties.stationary": true,
       "$and": [
         {
           "$or": [
@@ -22,6 +21,117 @@
             {
               "coordinates.b": {
                 "$lte": -10
+              }
+            }
+          ]
+        },
+        {
+          "$or": [
+            {
+              "properties.stationary": true
+            },
+            {
+              "$expr": {
+                "$or": [
+                  {
+                    "$gt": [
+                      {
+                        "$size": {
+                          "$filter": {
+                            "input": {
+                              "$ifNull": [
+                                "$ZTF.prv_candidates",
+                                []
+                              ]
+                            },
+                            "cond": {
+                              "$and": [
+                                {
+                                  "$lte": [
+                                    "$$this.jd",
+                                    {
+                                      "$subtract": [
+                                        "$candidate.jd",
+                                        0.01
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "$gte": [
+                                    "$$this.jd",
+                                    {
+                                      "$subtract": [
+                                        "$candidate.jd",
+                                        10
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "$eq": [
+                                    "$$this.isdiffpos",
+                                    true
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      0
+                    ]
+                  },
+                  {
+                    "$gt": [
+                      {
+                        "$size": {
+                          "$filter": {
+                            "input": {
+                              "$ifNull": [
+                                "$LSST.prv_candidates",
+                                []
+                              ]
+                            },
+                            "cond": {
+                              "$and": [
+                                {
+                                  "$lte": [
+                                    "$$this.jd",
+                                    {
+                                      "$subtract": [
+                                        "$candidate.jd",
+                                        0.01
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "$gte": [
+                                    "$$this.jd",
+                                    {
+                                      "$subtract": [
+                                        "$candidate.jd",
+                                        10
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "$eq": [
+                                    "$$this.isdiffpos",
+                                    true
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      0
+                    ]
+                  }
+                ]
               }
             }
           ]
@@ -100,6 +210,140 @@
             }
           }
         }
+      },
+      "vsx": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.VSX",
+                []
+              ]
+            },
+            "in": {
+              "$lte": [
+                "$$this.distance_arcsec",
+                1.5
+              ]
+            }
+          }
+        }
+      },
+      "wise_agn": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.AllWISE",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$lte": [
+                    "$$this.distance_arcsec",
+                    1.0
+                  ]
+                },
+                {
+                  "$gte": [
+                    {
+                      "$subtract": [
+                        {
+                          "$ifNull": [
+                            "$$this.w1mpro",
+                            0
+                          ]
+                        },
+                        {
+                          "$ifNull": [
+                            "$$this.w2mpro",
+                            0
+                          ]
+                        }
+                      ]
+                    },
+                    0.8
+                  ]
+                },
+                {
+                  "$ne": [
+                    {
+                      "$ifNull": [
+                        "$$this.w2mpro",
+                        null
+                      ]
+                    },
+                    null
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "star": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.LSPSC",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$lte": [
+                    "$$this.distance_arcsec",
+                    1.0
+                  ]
+                },
+                {
+                  "$gt": [
+                    "$$this.score",
+                    0.5
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "near_brightstar": {
+        "$anyElementTrue": {
+          "$map": {
+            "input": {
+              "$ifNull": [
+                "$cross_matches.LSPSC",
+                []
+              ]
+            },
+            "in": {
+              "$and": [
+                {
+                  "$lte": [
+                    "$$this.distance_arcsec",
+                    20.0
+                  ]
+                },
+                {
+                  "$gt": [
+                    "$$this.score",
+                    0.5
+                  ]
+                },
+                {
+                  "$lte": [
+                    "$$this.mag_white",
+                    15
+                  ]
+                }
+              ]
+            }
+          }
+        }
       }
     }
   },
@@ -109,7 +353,11 @@
       "quasar": false,
       "age": {
         "$lte": 10.0
-      }
+      },
+      "vsx": false,
+      "wise_agn": false,
+      "star": false,
+      "near_brightstar": false
     }
   },
   {
